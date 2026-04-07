@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outils d'Estimation | IBS Formation - Coach Daniel</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a1a; color: #fff; min-height: 100vh; }
+.header { text-align: center; padding: 40px 20px 20px; }
+.header h1 { font-size: 2.5rem; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+.header p { color: #aaa; font-size: 1.1rem; max-width: 700px; margin: 0 auto; }
+.coach-avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #FFD700; object-fit: cover; margin: 0 auto 16px; display: block; box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); animation: avatar-glow 3s ease-in-out infinite alternate; }
+.coach-avatar-fallback { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #FFD700; margin: 0 auto 16px; display: none; box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); animation: avatar-glow 3s ease-in-out infinite alternate; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-size: 2.5rem; font-weight: 800; line-height: 120px; text-align: center; }
+@keyframes avatar-glow { 0% { box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); } 100% { box-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,165,0,0.25); } }
+.header .subtitle { color: #ccc; font-size: 0.95rem; margin-top: 6px; font-style: italic; }
+.nav-back { display: inline-flex; align-items: center; gap: 8px; color: #FFD700; text-decoration: none; padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.3); font-size: 0.85rem; margin-bottom: 16px; transition: all 0.2s; }
+.nav-back:hover { background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.6); }
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
+.tool-card { background: #1a1a2e; border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; position: relative; overflow: hidden; }
+.tool-card:hover { transform: translateY(-4px); border-color: rgba(255,215,0,0.4); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+.tool-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.tool-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+.tool-desc { color: #aaa; font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px; }
+.tool-features { display: flex; gap: 6px; flex-wrap: wrap; }
+.feature-tag { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 16px; font-size: 0.75rem; color: #bbb; }
+
+/* Email Modal */
+.email-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 900; justify-content: center; align-items: center; padding: 20px; }
+.email-overlay.active { display: flex; }
+.email-box { background: #1a1a2e; border-radius: 20px; padding: 40px; max-width: 480px; width: 100%; text-align: center; border: 1px solid rgba(255,215,0,0.2); }
+.email-box h2 { font-size: 1.4rem; color: #FFD700; margin-bottom: 8px; }
+.email-box p { color: #aaa; font-size: 0.9rem; margin-bottom: 24px; line-height: 1.5; }
+.email-box .tool-icon-preview { font-size: 3rem; margin-bottom: 16px; }
+.email-input { width: 100%; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 14px 18px; color: #fff; font-size: 1rem; outline: none; margin-bottom: 16px; }
+.email-input:focus { border-color: #FFD700; }
+.email-input.error { border-color: #f44; }
+.email-error { color: #f44; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px; display: none; }
+.email-submit { background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 12px; padding: 14px 32px; color: #000; font-weight: 700; cursor: pointer; font-size: 1rem; width: 100%; transition: opacity 0.2s; }
+.email-submit:hover { opacity: 0.9; }
+.email-skip { background: none; border: none; color: #666; font-size: 0.8rem; cursor: pointer; margin-top: 12px; text-decoration: underline; }
+.email-skip:hover { color: #aaa; }
+.email-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.email-close:hover { background: rgba(255,0,0,0.3); }
+
+/* Chat Overlay */
+.chat-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.chat-overlay.active { display: flex; }
+.chat-container { background: #1a1a2e; border-radius: 20px; width: 100%; max-width: 750px; height: 90vh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255,215,0,0.2); }
+.chat-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.chat-header-icon { font-size: 1.8rem; }
+.chat-header-info h3 { font-size: 1.1rem; }
+.chat-header-info p { font-size: 0.8rem; color: #aaa; }
+.chat-close { margin-left: auto; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.chat-close:hover { background: rgba(255,0,0,0.3); }
+.cost-badge { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; color: #FFD700; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 85%; padding: 14px 18px; line-height: 1.6; font-size: 0.95rem; word-wrap: break-word; }
+.msg.bot { align-self: flex-start; background: #2a2a3e; border-radius: 4px 14px 14px 14px; color: #eee; line-height: 1.7; }
+.msg.user { align-self: flex-end; background: linear-gradient(135deg, #FFD700, #FFA500); border-radius: 14px 14px 4px 14px; color: #000; }
+.msg.bot strong { color: #FFD700; }
+.msg.bot .highlight { background: rgba(255,215,0,0.1); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #FFD700; margin: 8px 0; }
+.msg.bot table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+.msg.bot table th { background: rgba(255,215,0,0.15); color: #FFD700; padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(255,215,0,0.3); }
+.msg.bot table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.typing-indicator { align-self: flex-start; background: #2a2a3e; border-radius: 4px 14px 14px 14px; padding: 14px 20px; display: none; }
+.typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #888; margin: 0 2px; animation: bounce 1.4s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+/* Input area */
+.chat-input-area { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+.input-row { display: flex; gap: 10px; }
+.input-row input[type="text"] { flex: 1; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 16px; color: #fff; font-size: 0.95rem; outline: none; }
+.input-row input[type="text"]:focus { border-color: #FFD700; }
+.input-row button { background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 12px; padding: 12px 20px; color: #000; font-weight: 700; cursor: pointer; font-size: 1rem; }
+.input-row button:hover { opacity: 0.9; }
+.upload-row { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
+.upload-btn { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 8px 14px; color: #aaa; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+.upload-btn:hover { background: rgba(255,215,0,0.15); color: #FFD700; border-color: rgba(255,215,0,0.4); }
+.upload-btn input { display: none; }
+.upload-preview { display: none; align-items: center; gap: 8px; background: rgba(76,175,80,0.15); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; color: #4CAF50; }
+.upload-preview .remove-file { cursor: pointer; color: #f44; margin-left: 4px; }
+.input-hint { color: #555; font-size: 0.75rem; margin-top: 6px; font-style: italic; }
+
+/* Choices */
+.choices-container { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 20px 4px; justify-content: center; }
+.choice-btn { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.15)); border: 1px solid rgba(255,215,0,0.4); color: #FFD700; padding: 10px 18px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-family: inherit; }
+.choice-btn:hover { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; transform: scale(1.03); }
+
+/* CTA & Footer */
+.cta-banner { text-align: center; padding: 40px 20px; margin: 20px auto; max-width: 800px; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.1)); border-radius: 20px; border: 1px solid rgba(255,215,0,0.2); }
+.cta-banner h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 10px; }
+.cta-banner p { color: #aaa; margin-bottom: 20px; }
+.cta-banner a { display: inline-block; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: 700; }
+.footer { text-align: center; padding: 30px; color: #555; font-size: 0.85rem; }
+
+/* Stats bar */
+.stats-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; padding: 16px 20px 8px; max-width: 900px; margin: 0 auto; }
+.stat-item { text-align: center; min-width: 100px; }
+.stat-number { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-label { font-size: 0.75rem; color: #888; margin-top: 2px; }
+
+/* Cost summary in footer of chat */
+.cost-summary { display: flex; justify-content: space-between; padding: 6px 20px; background: rgba(0,0,0,0.3); font-size: 0.75rem; color: #666; border-top: 1px solid rgba(255,255,255,0.05); }
+.cost-summary .cost-value { color: #FFD700; font-weight: 600; }
+
+@media (max-width: 600px) {
+  .header h1 { font-size: 1.6rem; }
+  .tools-grid { grid-template-columns: 1fr; padding: 20px 12px; }
+  .chat-container { height: 95vh; border-radius: 12px; }
+  .upload-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <img class="coach-avatar" src="https://i.postimg.cc/mZvrxMH4/DNJ-token.png" alt="Coach Daniel NADJAR" id="coachPhoto" onerror="this.style.display='none';document.getElementById('coachFallback').style.display='block';">
+  <div class="coach-avatar-fallback" id="coachFallback">DN</div>
+  <a class="nav-back" href="https://danielnadjar.github.io/ibs-training/">&#8592; Retour aux Bots d'entraînement</a>
+  <h1>🏠 Outils d'Estimation IA</h1>
+  <p>Analysez vos opportunités immobilières avec l'intelligence artificielle, basée sur 25 ans d'expertise terrain de Coach Daniel NADJAR.</p>
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-number">4</div><div class="stat-label">Outils spécialisés</div></div>
+    <div class="stat-item"><div class="stat-number">IA</div><div class="stat-label">Cerveau virtuel</div></div>
+    <div class="stat-item"><div class="stat-number">25 ans</div><div class="stat-label">D'expertise terrain</div></div>
+    <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">Disponible</div></div>
+  </div>
+</div>
+
+<div class="tools-grid" id="toolsGrid"></div>
+
+<div class="cta-banner">
+  <h2>🎯 Envie de vous entraîner ?</h2>
+  <p>Nos bots d'entraînement IA vous permettent de pratiquer la prospection, la négociation, la prise de mandat et plus encore.</p>
+  <a href="https://danielnadjar.github.io/ibs-training/">Accéder aux Bots d'entraînement</a>
+</div>
+
+<div class="cta-banner" style="border-color: rgba(76,175,80,0.3); background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(46,125,50,0.1));">
+  <h2 style="color: #4CAF50;">🚀 Besoin d'aller plus loin ?</h2>
+  <p>Formations complètes et coaching personnalisé avec Coach Daniel.</p>
+  <a href="https://ia.ibsformation.com/" target="_blank" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">Découvrir les formations</a>
+</div>
+
+<div class="footer"><p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits réservés</p></div>
+
+<!-- Email Collection Modal -->
+<div class="email-overlay" id="emailOverlay">
+  <div class="email-box" style="position:relative;">
+    <button class="email-close" onclick="closeEmail()">&#10005;</button>
+    <div class="tool-icon-preview" id="emailToolIcon"></div>
+    <h2 id="emailToolName">Estimation</h2>
+    <p id="emailToolPrompt">Entrez votre adresse email pour recevoir le rapport d'estimation complet avec tous les détails et recommandations.</p>
+    <input type="email" class="email-input" id="emailInput" placeholder="votre@email.com" onkeypress="if(event.key==='Enter')submitEmail()">
+    <div class="email-error" id="emailError">Veuillez entrer une adresse email valide.</div>
+    <button class="email-submit" onclick="submitEmail()">Lancer l'estimation</button>
+  </div>
+</div>
+
+<!-- Chat Overlay -->
+<div class="chat-overlay" id="chatOverlay">
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-header-icon" id="chatToolIcon"></div>
+      <div class="chat-header-info">
+        <h3 id="chatToolName"></h3>
+        <p id="chatToolDesc"></p>
+      </div>
+      <div class="cost-badge" id="costBadge" title="Coût estimé de cette conversation">0.000 $</div>
+      <button class="chat-close" onclick="closeChat()">&#10005;</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="typing-indicator" id="typingIndicator"><span></span><span></span><span></span></div>
+    <div id="choicesSlot"></div>
+    <div class="cost-summary" id="costSummary">
+      <span>Tokens: <span class="cost-value" id="tokenCount">0</span> | Messages: <span class="cost-value" id="msgCount">0</span></span>
+      <span>Coût conversation: <span class="cost-value" id="costTotal">0.000 $</span></span>
+    </div>
+    <div class="chat-input-area" id="chatInputArea">
+      <div class="input-row">
+        <input type="text" id="chatInput" placeholder="Collez un lien d'annonce ou décrivez le bien..." onkeypress="if(event.key==='Enter')sendMessage()">
+        <button onclick="sendMessage()">Envoyer</button>
+      </div>
+      <div class="upload-row">
+        <label class="upload-btn" id="uploadBtn">
+          📎 Joindre une capture / un bilan
+          <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFileUpload(event)" multiple>
+        </label>
+        <div class="upload-preview" id="uploadPreview">
+          <span id="fileName"></span>
+          <span class="remove-file" onclick="removeFile()">&#10005;</span>
+        </div>
+      </div>
+      <div class="input-hint" id="inputHint">Collez un lien leboncoin, SeLoger, ou joignez une capture d'écran de l'annonce</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== TOOL DEFINITIONS =====================
+var TOOLS = [
+  {
+    slug: 'estimation-immo',
+    name: 'Estimation Bien Immobilier',
+    icon: '🏠',
+    color_from: '#4CAF50',
+    color_to: '#2E7D32',
+    description: "Analysez un bien immobilier à partir d'un lien d'annonce ou d'une capture d'écran. Obtenez le prix du marché, la rentabilité, le prix au m², la locativité, et le prix d'achat recommandé avec les arguments de négociation.",
+    features: ['Prix marché', 'Rentabilité', 'Prix/m²', 'Locativité', 'Négo'],
+    hint: "Collez un lien leboncoin, SeLoger, ou joignez une capture d'écran de l'annonce",
+    emailPrompt: "Entrez votre email pour recevoir le rapport d'estimation immobilière complet avec l'analyse du marché et les recommandations de négociation.",
+    welcome: "Bonjour ! Je suis votre assistant d'estimation immobilière, basé sur le cerveau virtuel de Coach Daniel NADJAR.\n\n**Comment ça marche :**\n1. Collez le lien d'une annonce (leboncoin, SeLoger, etc.) ou joignez une capture d'écran\n2. Je vous donne le prix du marché, le prix/m², la rentabilité, la locativité\n3. Je vous dis à quel prix acheter et avec quels arguments négocier\n\n**Que souhaitez-vous analyser ?**",
+    systemPrompt: "Tu es un expert en estimation immobilière avec 25 ans d'expérience (style Coach Daniel NADJAR - direct, percutant, pragmatique). Analyse les annonces immobilières et fournis : prix du marché basé sur les données publiques, prix au m² comparé au quartier, rentabilité brute et nette, locativité (demande locative de la zone), prix d'achat recommandé, arguments de négociation pour faire baisser le prix. Sois précis avec des chiffres. Utilise des tableaux quand c'est pertinent. Termine toujours par une recommandation claire : acheter ou pas, et à quel prix maximum."
+  },
+  {
+    slug: 'fonds-commerce',
+    name: 'Estimation Fonds de Commerce',
+    icon: '🏪',
+    color_from: '#2196F3',
+    color_to: '#1565C0',
+    description: "Analysez un ou plusieurs bilans pour en extraire l'EBE (Excédent Brut d'Exploitation). Obtenez une approche d'achat ou de revente avec le juste prix pour l'investisseur.",
+    features: ['EBE', 'Prix achat/vente', 'Valorisation', 'Analyse bilans', 'ROI'],
+    hint: "Joignez les bilans (PDF/image) ou décrivez les chiffres clés du fonds de commerce",
+    emailPrompt: "Entrez votre email pour recevoir l'analyse complète du fonds de commerce avec l'EBE, la valorisation et les recommandations d'investissement.",
+    welcome: "Bonjour ! Je suis votre expert en valorisation de fonds de commerce, basé sur le cerveau virtuel de Coach Daniel NADJAR.\n\n**Comment ça marche :**\n1. Joignez un ou plusieurs bilans (PDF ou capture d'écran)\n2. Ou décrivez les chiffres clés (CA, charges, loyer...)\n3. J'en sors l'EBE, la valorisation et le prix juste\n\n**Je vous donnerai :**\n- L'EBE (Excédent Brut d'Exploitation)\n- Le prix d'achat recommandé\n- Le prix de revente estimé\n- Les arguments pour négocier\n\n**Envoyez-moi les bilans ou décrivez le commerce !**",
+    systemPrompt: "Tu es un expert en valorisation de fonds de commerce avec 25 ans d'expérience (style Coach Daniel NADJAR - direct, cash, pragmatique). Analyse les bilans et fournis : calcul de l'EBE, valorisation par la méthode des multiples d'EBE (typiquement 3 à 5x selon le secteur), prix d'achat recommandé pour l'investisseur, prix de revente estimé, ratio loyer/CA, marge opérationnelle, points de vigilance. Présente les résultats avec des tableaux. Donne une recommandation claire : acheter ou pas, à quel prix, et pourquoi."
+  },
+  {
+    slug: 'marchand-biens',
+    name: 'Marchand de Biens - Découpe',
+    icon: '🏗️',
+    color_from: '#9C27B0',
+    color_to: '#6A1B9A',
+    description: "Analysez un produit pour marchand de biens à la découpe. Estimez la rentabilité par lot et globale, le prix d'achat maximum et le potentiel de revente à la découpe.",
+    features: ['Prix/lot', 'Marge globale', 'Prix achat max', 'Revente', 'Fiscalité'],
+    hint: "Collez un lien d'annonce, joignez des captures, ou décrivez le produit (surface, nb lots, localisation...)",
+    emailPrompt: "Entrez votre email pour recevoir l'analyse complète du produit marchand de biens avec la rentabilité par lot et les recommandations.",
+    welcome: "Bonjour ! Je suis votre expert en opérations de marchand de biens, basé sur le cerveau virtuel de Coach Daniel NADJAR.\n\n**Comment ça marche :**\n1. Collez un lien d'annonce ou joignez des captures/documents\n2. Décrivez le produit (immeuble, surface, nb lots potentiels, localisation)\n3. J'analyse la découpe et la rentabilité\n\n**Je vous donnerai :**\n- L'estimation de chaque lot à la revente\n- Le prix d'achat maximum\n- Les frais (notaire, travaux, portage)\n- La marge nette par lot et globale\n- La rentabilité de l'opération\n\n**Décrivez-moi le produit ou envoyez l'annonce !**",
+    systemPrompt: "Tu es un expert en opérations de marchand de biens avec 25 ans d'expérience (style Coach Daniel NADJAR - direct, chiffré, pragmatique). Analyse les produits pour marchand de biens à la découpe. Fournis : estimation de revente par lot (studio, T2, T3...), prix d'achat maximum recommandé, budget travaux estimé, frais de notaire et portage, marge brute et nette par lot, marge globale de l'opération, durée estimée de l'opération, fiscalité applicable (TVA sur marge, IS/IR). Présente avec des tableaux lot par lot. Recommandation claire : go ou no-go, et à quel prix d'achat maximum pour que l'opération soit rentable."
+  },
+  {
+    slug: 'location-saisonniere',
+    name: 'Estimation RBN - Location Saisonnière',
+    icon: '🏖️',
+    color_from: '#FF9800',
+    color_to: '#E65100',
+    description: "Estimez le Revenu Brut Net (RBN) d'un bien en location saisonnière. Analysez la rentabilité, le taux d'occupation prévisionnel et les revenus attendus.",
+    features: ['RBN', 'Taux occupation', 'Revenus/mois', 'Charges', 'Cashflow'],
+    hint: "Collez un lien d'annonce ou décrivez le bien (localisation, surface, nb chambres, équipements...)",
+    emailPrompt: "Entrez votre email pour recevoir l'estimation RBN complète avec les projections de revenus et le cashflow prévisionnel.",
+    welcome: "Bonjour ! Je suis votre expert en location saisonnière, basé sur le cerveau virtuel de Coach Daniel NADJAR.\n\n**Comment ça marche :**\n1. Collez un lien d'annonce ou joignez une capture\n2. Ou décrivez le bien (localisation, surface, nb chambres...)\n3. J'estime les revenus en location saisonnière\n\n**Je vous donnerai :**\n- Le RBN (Revenu Brut Net) estimé\n- Le taux d'occupation prévisionnel par saison\n- Les revenus moyens par nuit et par mois\n- Les charges et frais de gestion\n- Le cashflow net annuel\n- La rentabilité comparée à la location classique\n\n**Envoyez-moi le bien à analyser !**",
+    systemPrompt: "Tu es un expert en location saisonnière et meublés de tourisme avec 25 ans d'expérience (style Coach Daniel NADJAR - direct, chiffré, pragmatique). Analyse les biens pour la location saisonnière. Fournis : RBN (Revenu Brut Net) estimé annuel, prix moyen par nuit selon la zone et la saison, taux d'occupation prévisionnel (haute/moyenne/basse saison), revenus mensuels détaillés, charges (ménage, linge, plateforme, assurance, taxe de séjour, CFE), cashflow net mensuel et annuel, comparaison avec location classique, rentabilité brute et nette. Présente avec des tableaux saisonniers. Recommandation claire sur la viabilité du projet et le prix d'achat maximum pour une opération rentable."
+  }
+];
+
+// ===================== STATE =====================
+var API_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/training-api';
+var currentTool = null;
+var sessionId = null;
+var userEmail = null;
+var uploadedFiles = [];
+var conversationCost = { inputTokens: 0, outputTokens: 0, messages: 0, cost: 0 };
+
+// Pricing (Claude Sonnet approximation)
+var PRICE_INPUT = 3.0 / 1000000;  // $3 per 1M input tokens
+var PRICE_OUTPUT = 15.0 / 1000000; // $15 per 1M output tokens
+
+// ===================== RENDER TOOLS =====================
+function renderTools() {
+  var grid = document.getElementById('toolsGrid');
+  var html = '';
+  for (var i = 0; i < TOOLS.length; i++) {
+    var tool = TOOLS[i];
+    html += '<div class="tool-card" onclick="requestEmail(\'' + tool.slug + '\')">';
+    html += '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(135deg,' + tool.color_from + ',' + tool.color_to + ')"></div>';
+    html += '<div class="tool-icon">' + tool.icon + '</div>';
+    html += '<div class="tool-name">' + tool.name + '</div>';
+    html += '<div class="tool-desc">' + tool.description + '</div>';
+    html += '<div class="tool-features">';
+    for (var j = 0; j < tool.features.length; j++) {
+      html += '<span class="feature-tag">' + tool.features[j] + '</span>';
+    }
+    html += '</div></div>';
+  }
+  grid.innerHTML = html;
+}
+
+// ===================== EMAIL COLLECTION =====================
+function requestEmail(slug) {
+  currentTool = null;
+  for (var i = 0; i < TOOLS.length; i++) {
+    if (TOOLS[i].slug === slug) currentTool = TOOLS[i];
+  }
+  if (!currentTool) return;
+
+  document.getElementById('emailToolIcon').textContent = currentTool.icon;
+  document.getElementById('emailToolName').textContent = currentTool.name;
+  document.getElementById('emailToolPrompt').textContent = currentTool.emailPrompt;
+  document.getElementById('emailInput').value = userEmail || '';
+  document.getElementById('emailInput').classList.remove('error');
+  document.getElementById('emailError').style.display = 'none';
+  document.getElementById('emailOverlay').classList.add('active');
+  document.getElementById('emailInput').focus();
+}
+
+function closeEmail() {
+  document.getElementById('emailOverlay').classList.remove('active');
+}
+
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function submitEmail() {
+  var input = document.getElementById('emailInput');
+  var email = input.value.trim();
+  if (!validateEmail(email)) {
+    input.classList.add('error');
+    document.getElementById('emailError').style.display = 'block';
+    return;
+  }
+  userEmail = email;
+  localStorage.setItem('ibs_user_email', email);
+  closeEmail();
+  openChat();
+}
+
+// ===================== CHAT =====================
+function openChat() {
+  if (!currentTool) return;
+  sessionId = 'est_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  conversationCost = { inputTokens: 0, outputTokens: 0, messages: 0, cost: 0 };
+  updateCostDisplay();
+
+  document.getElementById('chatToolIcon').textContent = currentTool.icon;
+  document.getElementById('chatToolName').textContent = currentTool.name;
+  document.getElementById('chatToolDesc').textContent = userEmail;
+  document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('inputHint').textContent = currentTool.hint;
+  uploadedFiles = [];
+  document.getElementById('uploadPreview').style.display = 'none';
+
+  addMessage(currentTool.welcome, 'bot');
+  document.getElementById('chatOverlay').classList.add('active');
+  document.getElementById('chatInput').focus();
+
+  // Show initial choices
+  var choices = getInitialChoices(currentTool.slug);
+  if (choices.length) showChoices(choices);
+}
+
+function closeChat() {
+  clearChoices();
+  document.getElementById('chatOverlay').classList.remove('active');
+
+  // Save session summary
+  if (conversationCost.messages > 0) {
+    saveSessionCost();
+  }
+  currentTool = null;
+  sessionId = null;
+}
+
+function getInitialChoices(slug) {
+  var choices = {
+    'estimation-immo': ['📋 Coller un lien d\'annonce', '📸 Envoyer une capture', '✍️ Décrire le bien manuellement'],
+    'fonds-commerce': ['📄 Envoyer un bilan PDF', '📸 Photo du bilan', '✍️ Saisir les chiffres clés'],
+    'marchand-biens': ['📋 Coller un lien d\'annonce', '📸 Envoyer des captures', '✍️ Décrire le produit'],
+    'location-saisonniere': ['📋 Coller un lien d\'annonce', '📸 Envoyer une capture', '✍️ Décrire le bien']
+  };
+  return choices[slug] || [];
+}
+
+// ===================== MESSAGES =====================
+function addMessage(text, type) {
+  var container = document.getElementById('chatMessages');
+  var div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.innerHTML = formatText(text);
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function formatText(text) {
+  // Tables
+  text = text.replace(/\|(.+)\|/g, function(match) {
+    var rows = match.split('\n').filter(function(r) { return r.trim().startsWith('|'); });
+    if (rows.length < 2) return match;
+    var html = '<table>';
+    for (var i = 0; i < rows.length; i++) {
+      var cells = rows[i].split('|').filter(function(c) { return c.trim(); });
+      if (cells.every(function(c) { return /^[\s-:]+$/.test(c); })) continue;
+      var tag = i === 0 ? 'th' : 'td';
+      html += '<tr>';
+      for (var j = 0; j < cells.length; j++) {
+        html += '<' + tag + '>' + cells[j].trim() + '</' + tag + '>';
+      }
+      html += '</tr>';
+    }
+    html += '</table>';
+    return html;
+  });
+
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\n/g, '<br>');
+  text = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#FFD700">$1</a>');
+  return text;
+}
+
+// ===================== CHOICES =====================
+function clearChoices() {
+  var old = document.getElementById('choicesContainer');
+  if (old) old.remove();
+}
+
+function showChoices(choices) {
+  clearChoices();
+  var container = document.createElement('div');
+  container.className = 'choices-container';
+  container.id = 'choicesContainer';
+  for (var i = 0; i < choices.length; i++) {
+    (function(label) {
+      var btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = label;
+      btn.onclick = function() { pickChoice(label); };
+      container.appendChild(btn);
+    })(choices[i]);
+  }
+  document.getElementById('choicesSlot').appendChild(container);
+}
+
+function pickChoice(label) {
+  clearChoices();
+  document.getElementById('chatInput').value = label;
+  sendMessage();
+}
+
+// ===================== FILE UPLOAD =====================
+function handleFileUpload(event) {
+  var files = event.target.files;
+  if (!files.length) return;
+  uploadedFiles = [];
+  var names = [];
+  for (var i = 0; i < files.length; i++) {
+    uploadedFiles.push(files[i]);
+    names.push(files[i].name);
+  }
+  document.getElementById('fileName').textContent = names.join(', ');
+  document.getElementById('uploadPreview').style.display = 'flex';
+}
+
+function removeFile() {
+  uploadedFiles = [];
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+}
+
+function fileToBase64(file) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function() { resolve(reader.result); };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ===================== COST TRACKING =====================
+function estimateTokens(text) {
+  // Rough estimation: ~4 chars per token for French
+  return Math.ceil(text.length / 4);
+}
+
+function updateCost(inputText, outputText) {
+  var inTokens = estimateTokens(inputText);
+  var outTokens = estimateTokens(outputText);
+  conversationCost.inputTokens += inTokens;
+  conversationCost.outputTokens += outTokens;
+  conversationCost.messages += 1;
+  conversationCost.cost = (conversationCost.inputTokens * PRICE_INPUT) + (conversationCost.outputTokens * PRICE_OUTPUT);
+  updateCostDisplay();
+}
+
+function updateCostDisplay() {
+  var totalTokens = conversationCost.inputTokens + conversationCost.outputTokens;
+  document.getElementById('costBadge').textContent = conversationCost.cost.toFixed(3) + ' $';
+  document.getElementById('tokenCount').textContent = totalTokens.toLocaleString();
+  document.getElementById('msgCount').textContent = conversationCost.messages;
+  document.getElementById('costTotal').textContent = conversationCost.cost.toFixed(3) + ' $';
+}
+
+function saveSessionCost() {
+  var sessions = JSON.parse(localStorage.getItem('ibs_estimation_sessions') || '[]');
+  sessions.push({
+    tool: currentTool ? currentTool.slug : 'unknown',
+    toolName: currentTool ? currentTool.name : 'Unknown',
+    email: userEmail,
+    sessionId: sessionId,
+    date: new Date().toISOString(),
+    messages: conversationCost.messages,
+    inputTokens: conversationCost.inputTokens,
+    outputTokens: conversationCost.outputTokens,
+    cost: conversationCost.cost
+  });
+  localStorage.setItem('ibs_estimation_sessions', JSON.stringify(sessions));
+}
+
+// ===================== SEND MESSAGE =====================
+async function sendMessage() {
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if ((!text && !uploadedFiles.length) || !currentTool) return;
+  input.value = '';
+  clearChoices();
+
+  // Build the message with context
+  var fullMessage = text;
+  var hasFiles = uploadedFiles.length > 0;
+
+  if (hasFiles) {
+    var fileNames = uploadedFiles.map(function(f) { return f.name; }).join(', ');
+    addMessage((text ? text + '\n' : '') + '📎 ' + fileNames, 'user');
+  } else {
+    addMessage(text, 'user');
+  }
+
+  var typing = document.getElementById('typingIndicator');
+  typing.style.display = 'block';
+
+  try {
+    // Build message with tool context
+    var contextMessage = '[OUTIL: ' + currentTool.name + '] [SYSTEM: ' + currentTool.systemPrompt + '] [EMAIL: ' + userEmail + '] ';
+
+    if (hasFiles) {
+      // Convert files to base64 and include descriptions
+      var fileDescriptions = [];
+      for (var i = 0; i < uploadedFiles.length; i++) {
+        var base64 = await fileToBase64(uploadedFiles[i]);
+        fileDescriptions.push('[FICHIER: ' + uploadedFiles[i].name + ' - Type: ' + uploadedFiles[i].type + ']');
+      }
+      contextMessage += fileDescriptions.join(' ') + ' ';
+    }
+
+    contextMessage += text;
+
+    // Estimate input cost
+    var inputForCost = contextMessage;
+
+    var resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer coachdaniel2024' },
+      body: JSON.stringify({
+        message: contextMessage,
+        session_id: sessionId,
+        bot_slug: 'investissement'
+      })
+    });
+
+    var data = await resp.json();
+    typing.style.display = 'none';
+
+    // Clear uploaded files after sending
+    uploadedFiles = [];
+    document.getElementById('uploadPreview').style.display = 'none';
+    document.getElementById('fileInput').value = '';
+
+    if (data.reply) {
+      // Track cost
+      updateCost(inputForCost, data.reply);
+
+      var parsed = extractChoices(data.reply);
+      addMessage(parsed.text, 'bot');
+
+      if (parsed.choices) {
+        showChoices(parsed.choices);
+      } else {
+        showChoices(['📊 Plus de détails', '💰 Recommandation prix', '📧 Envoyer par email', '🔄 Nouvelle estimation']);
+      }
+    }
+  } catch(e) {
+    typing.style.display = 'none';
+    addMessage("Désolé, une erreur est survenue. Réessayez dans un instant.", 'bot');
+    showChoices(['🔄 Réessayer']);
+  }
+}
+
+function extractChoices(text) {
+  var choices = [];
+  var lines = text.split('\n');
+  var cleanLines = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    var match = line.match(/^(?:\d+[\.\)]\s*|[-\u2022]\s*|[A-D][\.\)]\s*)(.+)/);
+    if (match && match[1].length < 80) {
+      choices.push(match[1].replace(/\*\*/g, '').trim());
+    } else {
+      cleanLines.push(lines[i]);
+    }
+  }
+  if (choices.length >= 2 && choices.length <= 8) {
+    return { text: cleanLines.join('\n').trim(), choices: choices };
+  }
+  return { text: text, choices: null };
+}
+
+// ===================== INIT =====================
+// Restore email from localStorage
+var savedEmail = localStorage.getItem('ibs_user_email');
+if (savedEmail) userEmail = savedEmail;
+
+renderTools();
+</script>
+</body>
+</html>
