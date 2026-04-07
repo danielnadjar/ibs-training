@@ -14,7 +14,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .coach-avatar-fallback { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #FFD700; margin: 0 auto 16px; display: none; box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); animation: avatar-glow 3s ease-in-out infinite alternate; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-size: 2.5rem; font-weight: 800; line-height: 120px; text-align: center; }
 @keyframes avatar-glow { 0% { box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); } 100% { box-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,165,0,0.25); } }
 .header .subtitle { color: #ccc; font-size: 0.95rem; margin-top: 6px; font-style: italic; }
-.bots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
+.bots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
 .bot-card { background: #1a1a2e; border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; position: relative; overflow: hidden; }
 .bot-card:hover { transform: translateY(-4px); border-color: rgba(255,215,0,0.4); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
 .bot-icon { font-size: 2.5rem; margin-bottom: 12px; }
@@ -106,6 +106,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .analysis-loading .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(255,215,0,0.3); border-top-color: #FFD700; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .privacy-note { text-align: center; color: #555; font-size: 0.75rem; margin-top: 16px; padding: 0 10px; }
+@media (max-width: 900px) {
+  .bots-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 600px) {
   .header h1 { font-size: 1.8rem; }
   .bots-grid { grid-template-columns: 1fr; padding: 20px 12px; }
@@ -127,25 +130,16 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   </div>
   <p class="stats-note">🤖 <span>Données mises à jour automatiquement chaque semaine</span></p>
 </div>
-<div class="bots-grid" id="botsGrid"></div>
-<div class="bots-grid" style="max-width:400px;padding-top:0">
-  <div class="bot-card" onclick="openRecorder()" style="border:2px solid rgba(255,68,68,0.4);text-align:center">
-    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(135deg,#f44,#c00)"></div>
-    <div class="bot-icon">🎙️</div>
-    <div class="bot-name">Analyseur d'Appel</div>
-    <div class="bot-desc">Enregistrez un vrai appel prospect et recevez une analyse IA complète : score, points forts, axes d'amélioration et suggestions.</div>
-    <div class="bot-modes"><span class="mode-tag">🔴 Enregistrer</span><span class="mode-tag">🤖 Analyse IA</span></div>
-  </div>
-</div>
-<div class="cta-banner">
-  <h2>🚀 Besoin d'aller plus loin ?</h2>
-  <p>Nos formations complètes et le coaching personnalisé de Coach Daniel vous accompagnent vers l'excellence.</p>
-  <a href="https://ia.ibsformation.com/" target="_blank">Découvrir les formations</a>
-</div>
 <div class="usage-stats" id="usageStats">
   <div class="usage-stat">🤖 <span class="count" id="totalSessions">--</span> sessions d'entraînement</div>
   <div class="usage-stat">⏱️ <span class="count" id="totalHours">--</span> heures de pratique</div>
   <div class="usage-stat"><span class="live-dot"></span> <span class="count" id="liveUsers">--</span> en ligne</div>
+</div>
+<div class="bots-grid" id="botsGrid"></div>
+<div class="cta-banner">
+  <h2>🚀 Besoin d'aller plus loin ?</h2>
+  <p>Les formations complètes et le coaching personnalisé de Daniel NADJAR vous accompagnent vers l'excellence.</p>
+  <a href="https://ia.ibsformation.com/" target="_blank">Découvrir les formations</a>
 </div>
 <div class="footer"><p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits réservés</p></div>
 <div class="chat-overlay" id="chatOverlay">
@@ -176,18 +170,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
       <button class="record-close" onclick="closeRecorder()">✕</button>
     </div>
     <div class="record-body">
-      <div class="record-context">
-        <label>Type d'appel</label>
-        <select id="callType">
-          <option value="prospection">📞 Appel de prospection / pige</option>
-          <option value="negociation">🤝 Négociation / discussion prix</option>
-          <option value="mandat">📝 Prise de mandat / rendez-vous vendeur</option>
-          <option value="relance">🔄 Relance client / suivi</option>
-          <option value="decouverte">🔍 Appel de découverte acquéreur</option>
-          <option value="autre">💼 Autre</option>
-        </select>
-        <label>Contexte rapide (optionnel)</label>
-        <input type="text" id="callContext" placeholder="Ex: Pige sur un T3 à Lyon, vendeur hésitant...">
+      <div class="record-context" style="text-align:center">
+        <label style="margin-bottom:10px;font-size:0.95rem;color:#ccc">Quel type d'appel allez-vous passer ?</label>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button id="btnCallProspect" class="choice-btn" onclick="selectCallType('prospection')" style="padding:14px 24px;font-size:1rem;border:2px solid rgba(255,215,0,0.4)">📞 Je prospecte</button>
+          <button id="btnCallAnnonce" class="choice-btn" onclick="selectCallType('annonce')" style="padding:14px 24px;font-size:1rem;border:2px solid rgba(255,215,0,0.4)">📋 Je réponds à une annonce</button>
+        </div>
+        <input type="hidden" id="callType" value="">
       </div>
       <div class="record-status">
         <div class="big-mic" id="bigMicBtn" onclick="toggleCallRecording()">🎙️</div>
@@ -228,6 +217,14 @@ function renderBots() {
     html += '<div class="bot-modes"><span class="mode-tag">🎭 Jeu de rôle</span><span class="mode-tag">📚 Cours</span></div>';
     html += '</div>';
   }
+  // 6ème carte : Analyseur d'Appel
+  html += '<div class="bot-card" onclick="openRecorder()" style="border:2px solid rgba(255,68,68,0.4);text-align:center">';
+  html += '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(135deg,#f44,#c00)"></div>';
+  html += '<div class="bot-icon">🎙️</div>';
+  html += '<div class="bot-name">Analyseur d\'Appel</div>';
+  html += '<div class="bot-desc">Enregistrez un vrai appel prospect et recevez une analyse IA complète : score, points forts, axes d\'amélioration et suggestions.</div>';
+  html += '<div class="bot-modes"><span class="mode-tag">🔴 Enregistrer</span><span class="mode-tag">🤖 Analyse IA</span></div>';
+  html += '</div>';
   grid.innerHTML = html;
 }
 
@@ -622,6 +619,18 @@ var callTimerInterval = null;
 var callStartTime = null;
 var callDuration = 0;
 
+var selectedCallType = '';
+
+function selectCallType(type) {
+  selectedCallType = type;
+  document.getElementById('callType').value = type;
+  document.getElementById('btnCallProspect').style.opacity = type === 'prospection' ? '1' : '0.4';
+  document.getElementById('btnCallProspect').style.transform = type === 'prospection' ? 'scale(1.05)' : 'scale(1)';
+  document.getElementById('btnCallAnnonce').style.opacity = type === 'annonce' ? '1' : '0.4';
+  document.getElementById('btnCallAnnonce').style.transform = type === 'annonce' ? 'scale(1.05)' : 'scale(1)';
+  document.getElementById('recordHint').textContent = 'Type sélectionné ! Appuyez sur le micro pour commencer.';
+}
+
 function openRecorder() {
   document.getElementById('recordOverlay').classList.add('active');
   resetRecorder();
@@ -635,12 +644,18 @@ function closeRecorder() {
 function resetRecorder() {
   callTranscript = '';
   callDuration = 0;
+  selectedCallType = '';
+  document.getElementById('callType').value = '';
   document.getElementById('recordTimer').textContent = '00:00';
-  document.getElementById('recordHint').textContent = 'Appuyez sur le micro pour commencer l\'enregistrement';
+  document.getElementById('recordHint').textContent = 'Choisissez le type d\'appel puis appuyez sur le micro';
   document.getElementById('bigMicBtn').textContent = '🎙️';
   document.getElementById('bigMicBtn').classList.remove('rec');
   document.getElementById('btnAnalyze').disabled = true;
   document.getElementById('analysisResult').innerHTML = '';
+  document.getElementById('btnCallProspect').style.opacity = '1';
+  document.getElementById('btnCallProspect').style.transform = 'scale(1)';
+  document.getElementById('btnCallAnnonce').style.opacity = '1';
+  document.getElementById('btnCallAnnonce').style.transform = 'scale(1)';
 }
 
 function toggleCallRecording() {
@@ -749,20 +764,14 @@ async function analyzeCall() {
   resultDiv.innerHTML = '<div class="analysis-loading"><div class="spinner"></div><br>🤖 Coach Daniel analyse votre appel...<br><small>Cela peut prendre quelques secondes</small></div>';
   document.getElementById('btnAnalyze').disabled = true;
 
-  var callType = document.getElementById('callType').value;
-  var callCtx = document.getElementById('callContext').value.trim();
+  var callType = selectedCallType || 'prospection';
   var typeLabels = {
-    prospection: 'Prospection / Pige',
-    negociation: 'Négociation',
-    mandat: 'Prise de mandat',
-    relance: 'Relance client',
-    decouverte: 'Découverte acquéreur',
-    autre: 'Appel professionnel'
+    prospection: 'Prospection sortante (je prospecte)',
+    annonce: 'Réponse à une annonce (appel entrant)'
   };
 
   var prompt = '[MODE: ANALYSE_APPEL]\n';
-  prompt += 'TYPE D\'APPEL: ' + (typeLabels[callType] || callType) + '\n';
-  if (callCtx) prompt += 'CONTEXTE: ' + callCtx + '\n';
+  prompt += 'TYPE D\'APPEL: ' + (typeLabels[callType] || 'Appel professionnel') + '\n';
   prompt += 'DURÉE: ' + formatDuration(callDuration) + '\n\n';
   prompt += 'Voici la transcription de mon appel réel avec un prospect/client. ';
   prompt += 'Analyse-le en profondeur et donne-moi :\n';
@@ -780,7 +789,7 @@ async function analyzeCall() {
       body: JSON.stringify({
         message: prompt,
         session_id: 'call_' + Date.now(),
-        bot_slug: callType === 'autre' ? 'prospection' : callType
+        bot_slug: 'prospection'
       })
     });
     var data = await resp.json();
