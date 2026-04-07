@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entraînez-vous | IBS Formation - Coach Daniel</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a1a; color: #fff; min-height: 100vh; }
+.header { text-align: center; padding: 40px 20px 20px; }
+.header h1 { font-size: 2.5rem; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+.header p { color: #aaa; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+.coach-avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #FFD700; object-fit: cover; margin: 0 auto 16px; display: block; box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); animation: avatar-glow 3s ease-in-out infinite alternate; }
+.coach-avatar-fallback { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #FFD700; margin: 0 auto 16px; display: none; box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); animation: avatar-glow 3s ease-in-out infinite alternate; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-size: 2.5rem; font-weight: 800; line-height: 120px; text-align: center; }
+@keyframes avatar-glow { 0% { box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); } 100% { box-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,165,0,0.25); } }
+.header .subtitle { color: #ccc; font-size: 0.95rem; margin-top: 6px; font-style: italic; }
+.bots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
+.bot-card { background: #1a1a2e; border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; position: relative; overflow: hidden; }
+.bot-card:hover { transform: translateY(-4px); border-color: rgba(255,215,0,0.4); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+.bot-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.bot-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+.bot-desc { color: #aaa; font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px; }
+.bot-modes { display: flex; gap: 8px; flex-wrap: wrap; }
+.mode-tag { background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; color: #ccc; }
+.chat-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.chat-overlay.active { display: flex; }
+.chat-container { background: #1a1a2e; border-radius: 20px; width: 100%; max-width: 700px; height: 85vh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255,215,0,0.2); }
+.chat-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.chat-header-icon { font-size: 1.8rem; }
+.chat-header-info h3 { font-size: 1.1rem; }
+.chat-header-info p { font-size: 0.8rem; color: #aaa; }
+.chat-close { margin-left: auto; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.chat-close:hover { background: rgba(255,0,0,0.3); }
+.chat-mode-switch { display: flex; gap: 8px; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.mode-btn { flex: 1; padding: 8px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: #aaa; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+.mode-btn.active { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; border-color: transparent; font-weight: 600; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 85%; padding: 14px 18px; line-height: 1.5; font-size: 0.95rem; word-wrap: break-word; }
+.msg.bot { align-self: flex-start; background: #2a2a3e; border-radius: 4px 14px 14px 14px; color: #eee; }
+.msg.user { align-self: flex-end; background: linear-gradient(135deg, #FFD700, #FFA500); border-radius: 14px 14px 4px 14px; color: #000; }
+.msg.bot strong { color: #FFD700; }
+.typing-indicator { align-self: flex-start; background: #2a2a3e; border-radius: 4px 14px 14px 14px; padding: 14px 20px; display: none; }
+.typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #888; margin: 0 2px; animation: bounce 1.4s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+.chat-input-area { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; }
+.chat-input-area input { flex: 1; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 16px; color: #fff; font-size: 0.95rem; outline: none; }
+.chat-input-area input:focus { border-color: #FFD700; }
+.chat-input-area button { background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 12px; padding: 12px 20px; color: #000; font-weight: 700; cursor: pointer; font-size: 1rem; }
+.chat-input-area button:hover { opacity: 0.9; }
+.choices-container { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 20px 4px; justify-content: center; }
+.choice-btn { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.15)); border: 1px solid rgba(255,215,0,0.4); color: #FFD700; padding: 10px 18px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-family: inherit; }
+.choice-btn:hover { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; transform: scale(1.03); }
+.choice-btn:active { transform: scale(0.97); }
+.cta-banner { text-align: center; padding: 40px 20px; margin: 20px auto; max-width: 800px; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.1)); border-radius: 20px; border: 1px solid rgba(255,215,0,0.2); }
+.cta-banner h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 10px; }
+.cta-banner p { color: #aaa; margin-bottom: 20px; }
+.cta-banner a { display: inline-block; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: 700; }
+.stats-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; padding: 16px 20px 8px; max-width: 900px; margin: 0 auto; }
+.stat-item { text-align: center; min-width: 100px; }
+.stat-number { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-label { font-size: 0.75rem; color: #888; margin-top: 2px; }
+.stats-note { text-align: center; color: #555; font-size: 0.7rem; padding: 4px 20px 20px; font-style: italic; }
+.stats-note span { color: #4CAF50; }
+.footer { text-align: center; padding: 30px; color: #555; font-size: 0.85rem; }
+@media (max-width: 600px) {
+  .header h1 { font-size: 1.8rem; }
+  .bots-grid { grid-template-columns: 1fr; padding: 20px 12px; }
+  .chat-container { height: 95vh; border-radius: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <img class="coach-avatar" src="https://github.com/danielnadjar.png" alt="Coach Daniel NADJAR" id="coachPhoto" onerror="this.style.display='none';document.getElementById('coachFallback').style.display='block';">
+  <div class="coach-avatar-fallback" id="coachFallback">DN</div>
+  <h1>🎯 Entraînez-vous avec Daniel NADJAR le Coach</h1>
+  <p>Perfectionnez vos compétences immobilières avec des coachs d'entraînement IA basés sur le cerveau virtuel de Daniel NADJAR.</p>
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-number">88</div><div class="stat-label">Vidéos analysées</div></div>
+    <div class="stat-item"><div class="stat-number">24M</div><div class="stat-label">Mots ingérés</div></div>
+    <div class="stat-item"><div class="stat-number">150h+</div><div class="stat-label">De contenu lu</div></div>
+    <div class="stat-item"><div class="stat-number">25 ans</div><div class="stat-label">D'expérience terrain</div></div>
+  </div>
+  <p class="stats-note">🤖 <span>Données mises à jour automatiquement chaque semaine</span></p>
+</div>
+<div class="bots-grid" id="botsGrid"></div>
+<div class="cta-banner">
+  <h2>🚀 Besoin d'aller plus loin ?</h2>
+  <p>Nos formations complètes et le coaching personnalisé de Coach Daniel vous accompagnent vers l'excellence.</p>
+  <a href="https://ia.ibsformation.com/" target="_blank">Découvrir les formations</a>
+</div>
+<div class="footer"><p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits réservés</p></div>
+<div class="chat-overlay" id="chatOverlay">
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-header-icon" id="chatBotIcon"></div>
+      <div class="chat-header-info"><h3 id="chatBotName"></h3><p id="chatBotDesc"></p></div>
+      <button class="chat-close" onclick="closeChat()">✕</button>
+    </div>
+    <div class="chat-mode-switch">
+      <button class="mode-btn active" id="btnRoleplay" onclick="switchMode('roleplay')">🎭 Jeu de rôle</button>
+      <button class="mode-btn" id="btnCours" onclick="switchMode('cours')">📚 Cours interactif</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="typing-indicator" id="typingIndicator"><span></span><span></span><span></span></div>
+    <div class="chat-input-area" id="chatInputArea">
+      <input type="text" id="chatInput" placeholder="Tapez votre message ou choisissez une option..." onkeypress="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()">Envoyer</button>
+    </div>
+  </div>
+</div>
+<script>
+var BOTS = [
+  {slug:'prospection',name:'Coach Daniel - Prospection',description:'Maîtrisez la prospection immobilière : porte-à-porte, téléphone, digital, pige... Basé sur les méthodes de Daniel NADJAR.',icon:'🔍',color_from:'#4CAF50',color_to:'#2E7D32',welcome:'Bienvenue ! Je suis Coach Daniel, votre expert en Prospection. Choisissez un mode : Jeu de rôle pour simuler des situations réelles, ou Cours pour apprendre les techniques. Quel mode préférez-vous ?'},
+  {slug:'negociation',name:'Coach Daniel - Négociation',description:'Développez vos talents de négociateur : objections, prix, conditions, closing... Basé sur les méthodes de Daniel NADJAR.',icon:'🤝',color_from:'#2196F3',color_to:'#1565C0',welcome:'Bienvenue ! Je suis Coach Daniel, votre expert en Négociation. En mode Jeu de rôle, je simule un client difficile. En mode Cours, je vous enseigne les meilleures techniques. Que préférez-vous ?'},
+  {slug:'mandat',name:'Coach Daniel - Prise de Mandat',description:'Perfectionnez votre prise de mandat : R1, R2, estimation, exclusivité, closing... Basé sur les méthodes de Daniel NADJAR.',icon:'📝',color_from:'#9C27B0',color_to:'#6A1B9A',welcome:'Bienvenue ! Je suis Coach Daniel, votre expert en Prise de Mandat. Simulez un rendez-vous vendeur en Jeu de rôle ou apprenez les techniques en mode Cours. Par quoi commençons-nous ?'},
+  {slug:'redaction',name:"Coach Daniel - Rédaction d'Annonces",description:'Rédigez des annonces qui convertissent : titres accrocheurs, descriptions vendeuses, SEO... Basé sur les méthodes de Daniel NADJAR.',icon:'✍️',color_from:'#FF9800',color_to:'#E65100',welcome:"Bienvenue ! Je suis Coach Daniel, votre expert en Rédaction d'Annonces. En Jeu de rôle, donnez-moi un bien et je vous aide à créer l'annonce parfaite. En Cours, je vous enseigne les secrets d'une annonce qui convertit."},
+  {slug:'investissement',name:'Coach Daniel - Rentabilité & Investissement',description:"Maîtrisez les calculs de rentabilité, cashflow, fiscalité et stratégies d'investissement. Basé sur les méthodes de Daniel NADJAR.",icon:'💰',color_from:'#F44336',color_to:'#B71C1C',welcome:"Bienvenue ! Je suis Coach Daniel, votre expert en Rentabilité & Investissement. En Jeu de rôle, apportez un cas concret à analyser. En Cours, je vous enseigne les bases du calcul de rentabilité et des stratégies d'investissement."}
+];
+var API_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/training-api';
+var currentBot = null;
+var currentMode = 'roleplay';
+var sessionId = null;
+
+function renderBots() {
+  var grid = document.getElementById('botsGrid');
+  var html = '';
+  for (var i = 0; i < BOTS.length; i++) {
+    var bot = BOTS[i];
+    html += '<div class="bot-card" onclick="openChat(\'' + bot.slug + '\')">';
+    html += '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(135deg,' + bot.color_from + ',' + bot.color_to + ')"></div>';
+    html += '<div class="bot-icon">' + bot.icon + '</div>';
+    html += '<div class="bot-name">' + bot.name + '</div>';
+    html += '<div class="bot-desc">' + bot.description + '</div>';
+    html += '<div class="bot-modes"><span class="mode-tag">🎭 Jeu de rôle</span><span class="mode-tag">📚 Cours</span></div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function openChat(slug) {
+  currentBot = null;
+  for (var i = 0; i < BOTS.length; i++) { if (BOTS[i].slug === slug) currentBot = BOTS[i]; }
+  if (!currentBot) return;
+  sessionId = 'train_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  currentMode = 'roleplay';
+  document.getElementById('chatBotIcon').textContent = currentBot.icon;
+  document.getElementById('chatBotName').textContent = currentBot.name;
+  document.getElementById('chatBotDesc').textContent = 'Mode Jeu de rôle';
+  document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('btnRoleplay').classList.add('active');
+  document.getElementById('btnCours').classList.remove('active');
+  addMessage(currentBot.welcome, 'bot');
+  document.getElementById('chatOverlay').classList.add('active');
+  document.getElementById('chatInput').focus();
+  showChoices(getModeChoices('roleplay', currentBot.slug));
+}
+
+function closeChat() {
+  clearChoices();
+  document.getElementById('chatOverlay').classList.remove('active');
+  currentBot = null;
+  sessionId = null;
+}
+
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('btnRoleplay').classList.toggle('active', mode === 'roleplay');
+  document.getElementById('btnCours').classList.toggle('active', mode === 'cours');
+  document.getElementById('chatBotDesc').textContent = mode === 'roleplay' ? 'Mode Jeu de rôle' : 'Mode Cours interactif';
+  document.getElementById('chatMessages').innerHTML = '';
+  sessionId = 'train_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  var modeMsg = mode === 'roleplay'
+    ? 'Mode Jeu de rôle activé ! Choisissez un scénario pour commencer :'
+    : 'Mode Cours activé ! Choisissez un sujet pour commencer :';
+  addMessage(modeMsg, 'bot');
+  showChoices(getModeChoices(mode, currentBot.slug));
+}
+
+function addMessage(text, type) {
+  var container = document.getElementById('chatMessages');
+  var div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.innerHTML = formatText(text);
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function clearChoices() {
+  var old = document.getElementById('choicesContainer');
+  if (old) old.remove();
+}
+
+function showChoices(choices) {
+  clearChoices();
+  var container = document.createElement('div');
+  container.className = 'choices-container';
+  container.id = 'choicesContainer';
+  for (var i = 0; i < choices.length; i++) {
+    (function(label) {
+      var btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = label;
+      btn.onclick = function() { pickChoice(label); };
+      container.appendChild(btn);
+    })(choices[i]);
+  }
+  var messagesArea = document.getElementById('chatMessages');
+  messagesArea.parentNode.insertBefore(container, document.getElementById('chatInputArea'));
+  messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+function pickChoice(label) {
+  clearChoices();
+  document.getElementById('chatInput').value = label;
+  sendMessage();
+}
+
+function extractChoices(text) {
+  var choices = [];
+  var lines = text.split('\n');
+  var cleanLines = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    var match = line.match(/^(?:\d+[\.\)]\s*|[-•]\s*|[A-D][\.\)]\s*)(.+)/);
+    if (match && match[1].length < 80) {
+      choices.push(match[1].replace(/\*\*/g, '').trim());
+    } else {
+      cleanLines.push(lines[i]);
+    }
+  }
+  if (choices.length >= 2 && choices.length <= 8) {
+    return { text: cleanLines.join('\n').trim(), choices: choices };
+  }
+  return { text: text, choices: null };
+}
+
+function getWelcomeChoices() {
+  return ['🎭 Jeu de rôle', '📚 Cours interactif'];
+}
+
+function getModeChoices(mode, slug) {
+  if (mode === 'roleplay') {
+    var scenarios = {
+      prospection: ['📞 Appel de pige', '🚪 Porte-à-porte', '📱 Prospection digitale', '🏠 Relance client'],
+      negociation: ['💰 Négocier le prix', '😤 Client difficile', '📉 Offre basse à défendre', '🤝 Closing final'],
+      mandat: ['🏡 Premier rendez-vous (R1)', '📊 Présentation estimation (R2)', '✍️ Signature exclusivité', '😟 Vendeur hésitant'],
+      redaction: ['🏢 Appartement en ville', '🏡 Maison avec jardin', '🏗️ Bien neuf (VEFA)', '💎 Bien de prestige'],
+      investissement: ['🏢 Immeuble de rapport', '📊 Calcul de rentabilité', '🏠 Premier investissement', '💼 Optimisation fiscale']
+    };
+    return scenarios[slug] || ['🎯 Commencer un scénario'];
+  } else {
+    var cours = {
+      prospection: ['📋 Les bases de la prospection', '📞 Techniques de pige', '🔑 Scripts efficaces', '📈 Organiser sa semaine'],
+      negociation: ['🧠 Psychologie de la négo', '🛡️ Traiter les objections', '💬 Techniques de closing', '📊 Stratégies de prix'],
+      mandat: ['📝 Préparer son R1', '💰 Méthodes d\'estimation', '🎯 Obtenir l\'exclusivité', '📋 Du R1 au R2'],
+      redaction: ['✏️ Structure d\'une annonce', '🎯 Titres accrocheurs', '📸 Photos qui vendent', '🔍 SEO immobilier'],
+      investissement: ['📊 Rendement brut vs net', '💶 Calcul du cashflow', '🏛️ Fiscalité immobilière', '📈 Stratégies patrimoniales']
+    };
+    return cours[slug] || ['📖 Commencer le cours'];
+  }
+}
+
+function formatText(text) {
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\n/g, '<br>');
+  text = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#FFD700">$1</a>');
+  return text;
+}
+
+async function sendMessage() {
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if (!text || !currentBot) return;
+  input.value = '';
+  clearChoices();
+  addMessage(text, 'user');
+  var typing = document.getElementById('typingIndicator');
+  typing.style.display = 'block';
+  try {
+    var prefixed = '[MODE: ' + currentMode.toUpperCase() + '] ' + text;
+    var resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer coachdaniel2024' },
+      body: JSON.stringify({ message: prefixed, session_id: sessionId, bot_slug: currentBot.slug })
+    });
+    var data = await resp.json();
+    typing.style.display = 'none';
+    if (data.reply) {
+      var parsed = extractChoices(data.reply);
+      addMessage(parsed.text, 'bot');
+      if (parsed.choices) {
+        showChoices(parsed.choices);
+      } else {
+        showChoices(['✅ Continuer', '🔄 Autre scénario', '❓ Poser une question']);
+      }
+    }
+    if (data.action === 'show_calendly' && data.booking && data.booking.url) {
+      addMessage('📅 <a href="' + data.booking.url + '" target="_blank" style="color:#FFD700;font-weight:bold">Réserver un créneau avec Coach Daniel</a>', 'bot');
+    }
+  } catch(e) {
+    typing.style.display = 'none';
+    addMessage('Désolé, une erreur est survenue. Réessayez dans un instant.', 'bot');
+    showChoices(['🔄 Réessayer', '🏠 Retour à l\'accueil']);
+  }
+}
+
+renderBots();
+</script>
+</body>
+</html>
