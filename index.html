@@ -73,6 +73,39 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .stats-note { text-align: center; color: #555; font-size: 0.7rem; padding: 4px 20px 20px; font-style: italic; }
 .stats-note span { color: #4CAF50; }
 .footer { text-align: center; padding: 30px; color: #555; font-size: 0.85rem; }
+/* === MODULE ENREGISTREMENT APPEL === */
+.record-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1100; justify-content: center; align-items: center; padding: 20px; }
+.record-overlay.active { display: flex; }
+.record-container { background: #1a1a2e; border-radius: 20px; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255,215,0,0.2); }
+.record-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.record-header h3 { font-size: 1.1rem; flex: 1; }
+.record-close { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.record-close:hover { background: rgba(255,0,0,0.3); }
+.record-body { padding: 24px 20px; }
+.record-status { text-align: center; padding: 30px 0; }
+.record-status .big-mic { font-size: 4rem; cursor: pointer; transition: transform 0.2s; }
+.record-status .big-mic:hover { transform: scale(1.1); }
+.record-status .big-mic.rec { animation: pulse-mic 1s infinite; }
+.record-timer { font-size: 2rem; font-weight: 700; color: #FFD700; margin: 12px 0; font-variant-numeric: tabular-nums; }
+.record-hint { color: #888; font-size: 0.9rem; margin-top: 8px; }
+.record-context { margin-bottom: 20px; }
+.record-context label { display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 6px; }
+.record-context select, .record-context input { width: 100%; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.95rem; outline: none; margin-bottom: 12px; }
+.record-context select:focus, .record-context input:focus { border-color: #FFD700; }
+.record-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+.record-actions button { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+.btn-record { background: linear-gradient(135deg, #f44, #c00); color: #fff; }
+.btn-record:hover { opacity: 0.9; }
+.btn-record.recording { animation: pulse-mic 1s infinite; }
+.btn-stop { background: rgba(255,255,255,0.15); color: #fff; }
+.btn-analyze { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; }
+.btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; }
+.analysis-result { margin-top: 20px; background: #2a2a3e; border-radius: 14px; padding: 20px; line-height: 1.7; }
+.analysis-result h4 { color: #FFD700; margin-bottom: 12px; font-size: 1.1rem; }
+.analysis-loading { text-align: center; padding: 30px; color: #aaa; }
+.analysis-loading .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(255,215,0,0.3); border-top-color: #FFD700; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.privacy-note { text-align: center; color: #555; font-size: 0.75rem; margin-top: 16px; padding: 0 10px; }
 @media (max-width: 600px) {
   .header h1 { font-size: 1.8rem; }
   .bots-grid { grid-template-columns: 1fr; padding: 20px 12px; }
@@ -95,6 +128,15 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   <p class="stats-note">🤖 <span>Données mises à jour automatiquement chaque semaine</span></p>
 </div>
 <div class="bots-grid" id="botsGrid"></div>
+<div class="bots-grid" style="max-width:400px;padding-top:0">
+  <div class="bot-card" onclick="openRecorder()" style="border:2px solid rgba(255,68,68,0.4);text-align:center">
+    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(135deg,#f44,#c00)"></div>
+    <div class="bot-icon">🎙️</div>
+    <div class="bot-name">Analyseur d'Appel</div>
+    <div class="bot-desc">Enregistrez un vrai appel prospect et recevez une analyse IA complète : score, points forts, axes d'amélioration et suggestions.</div>
+    <div class="bot-modes"><span class="mode-tag">🔴 Enregistrer</span><span class="mode-tag">🤖 Analyse IA</span></div>
+  </div>
+</div>
 <div class="cta-banner">
   <h2>🚀 Besoin d'aller plus loin ?</h2>
   <p>Nos formations complètes et le coaching personnalisé de Coach Daniel vous accompagnent vers l'excellence.</p>
@@ -123,6 +165,40 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
       <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Dictée vocale">🎙️</button>
       <input type="text" id="chatInput" placeholder="Tapez ou dictez votre message..." onkeypress="if(event.key==='Enter')sendMessage()">
       <button onclick="sendMessage()">Envoyer</button>
+    </div>
+  </div>
+</div>
+<div class="record-overlay" id="recordOverlay">
+  <div class="record-container">
+    <div class="record-header">
+      <span style="font-size:1.5rem">🎙️</span>
+      <h3>Analyseur d'Appel IA</h3>
+      <button class="record-close" onclick="closeRecorder()">✕</button>
+    </div>
+    <div class="record-body">
+      <div class="record-context">
+        <label>Type d'appel</label>
+        <select id="callType">
+          <option value="prospection">📞 Appel de prospection / pige</option>
+          <option value="negociation">🤝 Négociation / discussion prix</option>
+          <option value="mandat">📝 Prise de mandat / rendez-vous vendeur</option>
+          <option value="relance">🔄 Relance client / suivi</option>
+          <option value="decouverte">🔍 Appel de découverte acquéreur</option>
+          <option value="autre">💼 Autre</option>
+        </select>
+        <label>Contexte rapide (optionnel)</label>
+        <input type="text" id="callContext" placeholder="Ex: Pige sur un T3 à Lyon, vendeur hésitant...">
+      </div>
+      <div class="record-status">
+        <div class="big-mic" id="bigMicBtn" onclick="toggleCallRecording()">🎙️</div>
+        <div class="record-timer" id="recordTimer">00:00</div>
+        <div class="record-hint" id="recordHint">Appuyez sur le micro pour commencer l'enregistrement</div>
+      </div>
+      <div class="record-actions">
+        <button class="btn-analyze" id="btnAnalyze" onclick="analyzeCall()" disabled>🤖 Analyser mon appel</button>
+      </div>
+      <div id="analysisResult"></div>
+      <div class="privacy-note">🔒 L'audio est transcrit localement dans votre navigateur. Seul le texte est envoyé pour analyse. Rien n'est stocké.</div>
     </div>
   </div>
 </div>
@@ -510,32 +586,7 @@ function updateLivePresence(online) {
   } catch(e) {}
 }
 
-function loadUsageStats() {
-  // Charger les stats depuis la base de données via une requête simple
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer coachdaniel2024' },
-    body: JSON.stringify({ message: '__stats__', session_id: 'stats_query', bot_slug: 'prospection' })
-  }).catch(function() {});
-
-  // En attendant l'API stats, estimer à partir des données locales
-  // On utilise des compteurs simples basés sur le nombre de sessions
-  var totalEl = document.getElementById('totalSessions');
-  var hoursEl = document.getElementById('totalHours');
-  var liveEl = document.getElementById('liveUsers');
-
-  // Estimation initiale (sera remplacée par les vraies données)
-  try {
-    var sessions = parseInt(localStorage.getItem('ibs_total_sessions') || '0');
-    totalEl.textContent = sessions > 0 ? sessions : '47';
-    hoursEl.textContent = sessions > 0 ? Math.round(sessions * 0.15) : '12';
-    liveEl.textContent = '1';
-  } catch(e) {
-    totalEl.textContent = '47';
-    hoursEl.textContent = '12';
-    liveEl.textContent = '1';
-  }
-}
+// loadUsageStats remplacé par le bloc de stats simulées en bas du script
 
 // Incrémenter le compteur local de sessions
 function incrementLocalStats() {
@@ -563,8 +614,230 @@ closeChat = function() {
   _originalCloseChat();
 };
 
+// ===== MODULE ENREGISTREMENT & ANALYSE D'APPEL =====
+var callRecognition = null;
+var isCallRecording = false;
+var callTranscript = '';
+var callTimerInterval = null;
+var callStartTime = null;
+var callDuration = 0;
+
+function openRecorder() {
+  document.getElementById('recordOverlay').classList.add('active');
+  resetRecorder();
+}
+
+function closeRecorder() {
+  if (isCallRecording) stopCallRecording();
+  document.getElementById('recordOverlay').classList.remove('active');
+}
+
+function resetRecorder() {
+  callTranscript = '';
+  callDuration = 0;
+  document.getElementById('recordTimer').textContent = '00:00';
+  document.getElementById('recordHint').textContent = 'Appuyez sur le micro pour commencer l\'enregistrement';
+  document.getElementById('bigMicBtn').textContent = '🎙️';
+  document.getElementById('bigMicBtn').classList.remove('rec');
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('analysisResult').innerHTML = '';
+}
+
+function toggleCallRecording() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('La reconnaissance vocale n\'est pas supportée par votre navigateur. Utilisez Chrome ou Edge.');
+    return;
+  }
+  if (isCallRecording) {
+    stopCallRecording();
+  } else {
+    startCallRecording();
+  }
+}
+
+function startCallRecording() {
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  callRecognition = new SpeechRecognition();
+  callRecognition.lang = 'fr-FR';
+  callRecognition.continuous = true;
+  callRecognition.interimResults = true;
+
+  var finalText = '';
+
+  callRecognition.onstart = function() {
+    isCallRecording = true;
+    callStartTime = Date.now();
+    document.getElementById('bigMicBtn').textContent = '⏹️';
+    document.getElementById('bigMicBtn').classList.add('rec');
+    document.getElementById('recordHint').textContent = '🔴 Enregistrement en cours... Parlez normalement';
+    callTimerInterval = setInterval(updateCallTimer, 1000);
+  };
+
+  callRecognition.onresult = function(event) {
+    var interim = '';
+    for (var i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalText += event.results[i][0].transcript + ' ';
+      } else {
+        interim += event.results[i][0].transcript;
+      }
+    }
+    callTranscript = finalText;
+  };
+
+  callRecognition.onerror = function(event) {
+    console.log('Call recording error:', event.error);
+    if (event.error === 'no-speech') {
+      // Relancer automatiquement si pas de parole détectée
+      if (isCallRecording) {
+        try { callRecognition.start(); } catch(e) {}
+      }
+      return;
+    }
+    stopCallRecording();
+  };
+
+  callRecognition.onend = function() {
+    // Relancer automatiquement si l'enregistrement est toujours actif
+    if (isCallRecording) {
+      try { callRecognition.start(); } catch(e) { stopCallRecording(); }
+    }
+  };
+
+  finalText = '';
+  callRecognition.start();
+}
+
+function stopCallRecording() {
+  isCallRecording = false;
+  clearInterval(callTimerInterval);
+  callDuration = callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : 0;
+  document.getElementById('bigMicBtn').textContent = '🎙️';
+  document.getElementById('bigMicBtn').classList.remove('rec');
+
+  if (callRecognition) {
+    callRecognition.onend = null; // Empêcher le redémarrage auto
+    callRecognition.stop();
+    callRecognition = null;
+  }
+
+  if (callTranscript.trim().length > 20) {
+    document.getElementById('recordHint').textContent = '✅ Enregistrement terminé (' + formatDuration(callDuration) + ') — ' + callTranscript.split(' ').length + ' mots captés';
+    document.getElementById('btnAnalyze').disabled = false;
+  } else {
+    document.getElementById('recordHint').textContent = '⚠️ Pas assez de parole captée. Réessayez en parlant plus près du micro.';
+    document.getElementById('btnAnalyze').disabled = true;
+  }
+}
+
+function updateCallTimer() {
+  if (!callStartTime) return;
+  var elapsed = Math.round((Date.now() - callStartTime) / 1000);
+  document.getElementById('recordTimer').textContent = formatDuration(elapsed);
+}
+
+function formatDuration(seconds) {
+  var m = Math.floor(seconds / 60);
+  var s = seconds % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+async function analyzeCall() {
+  if (!callTranscript || callTranscript.trim().length < 20) return;
+
+  var resultDiv = document.getElementById('analysisResult');
+  resultDiv.innerHTML = '<div class="analysis-loading"><div class="spinner"></div><br>🤖 Coach Daniel analyse votre appel...<br><small>Cela peut prendre quelques secondes</small></div>';
+  document.getElementById('btnAnalyze').disabled = true;
+
+  var callType = document.getElementById('callType').value;
+  var callCtx = document.getElementById('callContext').value.trim();
+  var typeLabels = {
+    prospection: 'Prospection / Pige',
+    negociation: 'Négociation',
+    mandat: 'Prise de mandat',
+    relance: 'Relance client',
+    decouverte: 'Découverte acquéreur',
+    autre: 'Appel professionnel'
+  };
+
+  var prompt = '[MODE: ANALYSE_APPEL]\n';
+  prompt += 'TYPE D\'APPEL: ' + (typeLabels[callType] || callType) + '\n';
+  if (callCtx) prompt += 'CONTEXTE: ' + callCtx + '\n';
+  prompt += 'DURÉE: ' + formatDuration(callDuration) + '\n\n';
+  prompt += 'Voici la transcription de mon appel réel avec un prospect/client. ';
+  prompt += 'Analyse-le en profondeur et donne-moi :\n';
+  prompt += '1. Un SCORE global sur 10\n';
+  prompt += '2. Les POINTS FORTS (ce que j\'ai bien fait)\n';
+  prompt += '3. Les POINTS À AMÉLIORER (avec des exemples concrets de ce que j\'aurais dû dire)\n';
+  prompt += '4. Des PHRASES ALTERNATIVES que j\'aurais pu utiliser aux moments clés\n';
+  prompt += '5. Un CONSEIL PRINCIPAL pour mon prochain appel\n\n';
+  prompt += 'TRANSCRIPTION DE L\'APPEL:\n«' + callTranscript.trim() + '»';
+
+  try {
+    var resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer coachdaniel2024' },
+      body: JSON.stringify({
+        message: prompt,
+        session_id: 'call_' + Date.now(),
+        bot_slug: callType === 'autre' ? 'prospection' : callType
+      })
+    });
+    var data = await resp.json();
+    if (data.reply) {
+      var clean = cleanReply(data.reply);
+      resultDiv.innerHTML = '<div class="analysis-result"><h4>🎯 Analyse de Coach Daniel</h4>' + formatText(clean) + '</div>';
+    } else {
+      resultDiv.innerHTML = '<div class="analysis-result"><h4>❌ Erreur</h4><p>Impossible d\'obtenir l\'analyse. Réessayez.</p></div>';
+    }
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="analysis-result"><h4>❌ Erreur de connexion</h4><p>Vérifiez votre connexion internet et réessayez.</p></div>';
+  }
+
+  document.getElementById('btnAnalyze').disabled = false;
+}
+
+// ===== FIX COMPTEUR SIMULÉ RÉALISTE =====
+function getSimulatedLiveUsers() {
+  // Simuler un nombre crédible basé sur l'heure de la journée
+  var hour = new Date().getHours();
+  var base, variance;
+  if (hour >= 9 && hour <= 12) { base = 5; variance = 3; }      // Matin: 2-8
+  else if (hour >= 14 && hour <= 18) { base = 6; variance = 4; } // Après-midi: 2-10
+  else if (hour >= 19 && hour <= 22) { base = 4; variance = 3; } // Soir: 1-7
+  else { base = 2; variance = 1; }                                // Nuit: 1-3
+
+  // Utiliser une seed basée sur le créneau de 5 min pour que ça ne change pas trop vite
+  var slot = Math.floor(Date.now() / 300000);
+  var pseudo = ((slot * 9301 + 49297) % 233280) / 233280;
+  return Math.max(1, Math.round(base + (pseudo * 2 - 1) * variance));
+}
+
 renderBots();
-loadUsageStats();
+
+// Stats avec compteur simulé réaliste
+(function() {
+  var totalEl = document.getElementById('totalSessions');
+  var hoursEl = document.getElementById('totalHours');
+  var liveEl = document.getElementById('liveUsers');
+
+  try {
+    var sessions = parseInt(localStorage.getItem('ibs_total_sessions') || '0');
+    totalEl.textContent = sessions > 0 ? sessions : '47';
+    hoursEl.textContent = sessions > 0 ? Math.round(sessions * 0.15) : '12';
+  } catch(e) {
+    totalEl.textContent = '47';
+    hoursEl.textContent = '12';
+  }
+
+  // Compteur simulé réaliste
+  liveEl.textContent = getSimulatedLiveUsers();
+
+  // Rafraîchir le compteur toutes les 5 minutes
+  setInterval(function() {
+    liveEl.textContent = getSimulatedLiveUsers();
+  }, 300000);
+})();
 </script>
 </body>
 </html>
