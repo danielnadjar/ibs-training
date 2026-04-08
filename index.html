@@ -177,6 +177,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 <div class="user-bar" id="userBar">
   <div class="user-info"><span id="userGreeting">Bonjour</span></div>
   <div class="credits-badge" id="creditsDisplay" onclick="openCreditsShop()">0 crédits</div>
+  <button class="logout-btn" onclick="openCreditsShop()" style="border-color:rgba(255,215,0,0.3);color:#FFD700;">Acheter des crédits</button>
   <button class="logout-btn" onclick="logoutUser()">Déconnexion</button>
 </div>
 <div class="bots-grid" id="botsGrid"></div>
@@ -190,7 +191,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   <p>Les formations complètes et le coaching personnalisé de Daniel NADJAR vous accompagnent vers l'excellence.</p>
   <a href="https://ia.ibsformation.com/" target="_blank">Découvrir les formations</a>
 </div>
-<div class="footer"><p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits réservés</p></div>
+<div class="footer">
+  <p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits réservés</p>
+  <a href="admin.html" style="color:#333;font-size:0.7rem;text-decoration:none;margin-top:8px;display:inline-block;">Admin</a>
+</div>
 <div class="chat-overlay" id="chatOverlay">
   <div class="chat-container">
     <div class="chat-header">

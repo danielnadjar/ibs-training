@@ -162,6 +162,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 <div class="user-bar" id="userBar">
   <span class="greeting" id="userGreeting"></span>
   <span class="credits-badge" id="creditsBadge" onclick="openShop()"></span>
+  <button class="logout-btn" onclick="openShop()" style="border-color:rgba(255,215,0,0.3);color:#FFD700;">Acheter des credits</button>
   <button class="logout-btn" onclick="doLogout()">Deconnexion</button>
 </div>
 
@@ -179,7 +180,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   <a href="https://ia.ibsformation.com/" target="_blank" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">Decouvrir les formations</a>
 </div>
 
-<div class="footer"><p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits reserves</p></div>
+<div class="footer">
+  <p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits reserves</p>
+  <a href="admin.html" style="color:#333;font-size:0.7rem;text-decoration:none;margin-top:8px;display:inline-block;">Admin</a>
+</div>
 
 <!-- Registration Modal -->
 <div class="register-overlay" id="registerOverlay">
@@ -207,24 +211,24 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
       <div class="pack-card" onclick="IBS.buyCredits(0)">
         <div class="pack-credits">5</div>
         <div class="pack-label">credits</div>
-        <div class="pack-price">9 &euro;</div>
+        <div class="pack-price">4,99 &euro;</div>
       </div>
       <div class="pack-card" onclick="IBS.buyCredits(1)">
         <div class="pack-credits">15</div>
         <div class="pack-label">credits</div>
-        <div class="pack-price">19 &euro;</div>
+        <div class="pack-price">9,99 &euro;</div>
         <div class="pack-badge">Populaire</div>
       </div>
       <div class="pack-card" onclick="IBS.buyCredits(2)">
         <div class="pack-credits">50</div>
         <div class="pack-label">credits</div>
-        <div class="pack-price">49 &euro;</div>
-        <div class="pack-badge">-40%</div>
+        <div class="pack-price">24,99 &euro;</div>
+        <div class="pack-badge">-50%</div>
       </div>
       <div class="pack-card" onclick="IBS.buyCredits(3)">
         <div class="pack-credits">150</div>
         <div class="pack-label">credits</div>
-        <div class="pack-price">99 &euro;</div>
+        <div class="pack-price">59,99 &euro;</div>
         <div class="pack-badge">Meilleure offre</div>
       </div>
     </div>
