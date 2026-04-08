@@ -264,6 +264,23 @@ tbody tr:hover { background: rgba(255,215,0,0.03); }
         <input type="number" id="cfgCreditCost" min="1" value="1">
         <button class="btn" onclick="saveConfigCreditCost()">Enregistrer</button>
       </div>
+      <div class="config-card">
+        <h3>Mot de passe admin</h3>
+        <label>Nouveau mot de passe</label>
+        <input type="password" id="cfgNewPassword" placeholder="Nouveau mot de passe">
+        <label style="margin-top:8px;">Confirmer</label>
+        <input type="password" id="cfgConfirmPassword" placeholder="Confirmer le mot de passe">
+        <button class="btn" onclick="saveAdminPassword()">Modifier le mot de passe</button>
+      </div>
+      <div class="config-card">
+        <h3>Photo du Coach</h3>
+        <div style="text-align:center;margin-bottom:12px;">
+          <img id="cfgPhotoPreview" src="https://ibsformation.com/wp-content/uploads/2024/03/coach-daniel.webp" style="width:80px;height:80px;border-radius:50%;border:3px solid #FFD700;object-fit:cover;" onerror="this.src='';this.style.display='none'">
+        </div>
+        <label>URL de la photo</label>
+        <input type="text" id="cfgPhotoUrl" placeholder="https://..." value="https://ibsformation.com/wp-content/uploads/2024/03/coach-daniel.webp">
+        <button class="btn" onclick="savePhotoUrl()">Enregistrer</button>
+      </div>
     </div>
   </div>
 
@@ -325,7 +342,7 @@ tbody tr:hover { background: rgba(255,215,0,0.03); }
 // IBS Admin Dashboard
 // =====================================================================
 
-var ADMIN_PASSWORD = 'coachdaniel2024';
+var ADMIN_PASSWORD = localStorage.getItem('ibs_admin_pw') || 'coachdaniel2024';
 var CREDITS_API = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/ibs-credits-api';
 var SUPABASE_REST = 'https://cbfypewsudbcuslhpkzx.supabase.co/rest/v1';
 var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZnlwZXdzdWRiY3VzbGhwa3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NjYxMTAsImV4cCI6MjA5MDQ0MjExMH0.GYkZF5GXFsSAlpcyMC7jz0bfzrACNv8YRFQJIG0ByKY';
@@ -351,9 +368,21 @@ document.getElementById('loginPassword').addEventListener('keydown', function(e)
   if (e.key === 'Enter') attemptLogin();
 });
 
-function attemptLogin() {
+async function attemptLogin() {
   var pw = document.getElementById('loginPassword').value;
-  if (pw === ADMIN_PASSWORD) {
+  // Check against local password AND server password
+  var serverPw = null;
+  try {
+    var r = await fetch(SUPABASE_REST + '/ibs_config?key=eq.admin_password&select=value', {
+      headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY }
+    });
+    var d = await r.json();
+    if (d && d[0] && d[0].value) serverPw = d[0].value;
+  } catch(e) {}
+  var validPw = serverPw || ADMIN_PASSWORD;
+  if (pw === validPw) {
+    ADMIN_PASSWORD = pw;
+    localStorage.setItem('ibs_admin_pw', pw);
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     loadAll();
@@ -617,6 +646,12 @@ async function loadConfig() {
         if (c.key === 'credit_cost') {
           document.getElementById('cfgCreditCost').value = c.value || 1;
         }
+        if (c.key === 'coach_photo_url' && c.value) {
+          document.getElementById('cfgPhotoUrl').value = c.value;
+          document.getElementById('cfgPhotoPreview').src = c.value;
+          var headerImg = document.querySelector('.coach-avatar');
+          if (headerImg) headerImg.src = c.value;
+        }
       });
     }
   } catch(e) {
@@ -637,6 +672,72 @@ async function saveConfigFreeCredits() {
     } else {
       showToast('Credits gratuits mis a jour: ' + val, 'success');
     }
+  } catch(e) {
+    showToast('Erreur de connexion', 'error');
+  }
+}
+
+async function saveAdminPassword() {
+  var newPw = document.getElementById('cfgNewPassword').value;
+  var confirmPw = document.getElementById('cfgConfirmPassword').value;
+  if (!newPw || newPw.length < 6) { showToast('Minimum 6 caracteres', 'error'); return; }
+  if (newPw !== confirmPw) { showToast('Les mots de passe ne correspondent pas', 'error'); return; }
+  try {
+    var resp = await fetch(SUPABASE_REST + '/ibs_config?key=eq.admin_password', {
+      method: 'PATCH',
+      headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ value: newPw, updated_at: new Date().toISOString() })
+    });
+    if (resp.status === 204 || resp.ok) {
+      // Check if row existed (204 = updated, but could be 0 rows)
+      var check = await fetch(SUPABASE_REST + '/ibs_config?key=eq.admin_password', {
+        headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY }
+      });
+      var rows = await check.json();
+      if (!rows || rows.length === 0) {
+        await fetch(SUPABASE_REST + '/ibs_config', {
+          method: 'POST',
+          headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ key: 'admin_password', value: newPw })
+        });
+      }
+      ADMIN_PASSWORD = newPw;
+      localStorage.setItem('ibs_admin_pw', newPw);
+      showToast('Mot de passe modifie avec succes', 'success');
+      document.getElementById('cfgNewPassword').value = '';
+      document.getElementById('cfgConfirmPassword').value = '';
+    }
+  } catch(e) {
+    showToast('Erreur de connexion', 'error');
+  }
+}
+
+async function savePhotoUrl() {
+  var url = document.getElementById('cfgPhotoUrl').value.trim();
+  if (!url) { showToast('URL vide', 'error'); return; }
+  try {
+    var resp = await fetch(SUPABASE_REST + '/ibs_config?key=eq.coach_photo_url', {
+      method: 'PATCH',
+      headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ value: url, updated_at: new Date().toISOString() })
+    });
+    var check = await fetch(SUPABASE_REST + '/ibs_config?key=eq.coach_photo_url', {
+      headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY }
+    });
+    var rows = await check.json();
+    if (!rows || rows.length === 0) {
+      await fetch(SUPABASE_REST + '/ibs_config', {
+        method: 'POST',
+        headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ key: 'coach_photo_url', value: url })
+      });
+    }
+    document.getElementById('cfgPhotoPreview').src = url;
+    document.getElementById('cfgPhotoPreview').style.display = 'block';
+    // Update header photo too
+    var headerImg = document.querySelector('.coach-avatar');
+    if (headerImg) headerImg.src = url;
+    showToast('Photo mise a jour', 'success');
   } catch(e) {
     showToast('Erreur de connexion', 'error');
   }
