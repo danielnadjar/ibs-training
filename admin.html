@@ -136,6 +136,22 @@ tbody tr:hover { background: rgba(255,215,0,0.03); }
     <input type="password" id="loginPassword" placeholder="Mot de passe..." autofocus>
     <button onclick="attemptLogin()">Connexion</button>
     <div class="login-error" id="loginError">Mot de passe incorrect</div>
+    <a href="#" onclick="showForgotPassword();return false" style="color:#FFD700;font-size:0.82rem;display:inline-block;margin-top:16px;text-decoration:none;opacity:0.7;">Mot de passe oublie ?</a>
+    <!-- Forgot password form -->
+    <div id="forgotPwStep1" style="display:none;margin-top:20px;text-align:left;">
+      <p style="color:#ccc;font-size:0.85rem;margin-bottom:12px;">Entrez l'email admin pour recevoir un code de reinitialisation :</p>
+      <input type="email" id="forgotEmail" placeholder="Votre email admin..." style="width:100%;background:#2a2a3e;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;color:#fff;font-size:1rem;outline:none;margin-bottom:12px;">
+      <button onclick="sendResetCode()" style="background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:12px;padding:12px 24px;color:#000;font-weight:700;cursor:pointer;font-size:0.95rem;width:100%;">Envoyer le code</button>
+      <div id="forgotMsg" style="color:#4CAF50;font-size:0.82rem;margin-top:8px;display:none;"></div>
+    </div>
+    <div id="forgotPwStep2" style="display:none;margin-top:20px;text-align:left;">
+      <p style="color:#ccc;font-size:0.85rem;margin-bottom:12px;">Entrez le code recu par email :</p>
+      <input type="text" id="resetCode" placeholder="Code a 6 chiffres..." style="width:100%;background:#2a2a3e;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;color:#fff;font-size:1.2rem;outline:none;margin-bottom:12px;text-align:center;letter-spacing:8px;">
+      <p style="color:#ccc;font-size:0.85rem;margin-bottom:8px;">Nouveau mot de passe :</p>
+      <input type="password" id="resetNewPw" placeholder="Nouveau mot de passe..." style="width:100%;background:#2a2a3e;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px 18px;color:#fff;font-size:1rem;outline:none;margin-bottom:12px;">
+      <button onclick="confirmResetPassword()" style="background:linear-gradient(135deg,#FFD700,#FFA500);border:none;border-radius:12px;padding:12px 24px;color:#000;font-weight:700;cursor:pointer;font-size:0.95rem;width:100%;">Reinitialiser</button>
+      <div id="resetMsg" style="color:#f44;font-size:0.82rem;margin-top:8px;display:none;"></div>
+    </div>
   </div>
 </div>
 
@@ -914,6 +930,76 @@ function copyGSheetScript() {
   navigator.clipboard.writeText(text).then(function() {
     showToast('Script copie dans le presse-papier', 'success');
   });
+}
+
+// ===== FORGOT PASSWORD =====
+var resetCodeSent = '';
+
+function showForgotPassword() {
+  document.getElementById('forgotPwStep1').style.display = 'block';
+  document.getElementById('forgotPwStep2').style.display = 'none';
+}
+
+async function sendResetCode() {
+  var email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { return; }
+  var msgEl = document.getElementById('forgotMsg');
+  msgEl.style.display = 'block';
+  msgEl.style.color = '#FFD700';
+  msgEl.textContent = 'Envoi en cours...';
+  try {
+    var resp = await fetch('https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/ibs-admin-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'send_code', email: email })
+    });
+    var data = await resp.json();
+    if (data.error) {
+      msgEl.style.color = '#f44';
+      msgEl.textContent = data.error;
+    } else {
+      msgEl.style.color = '#4CAF50';
+      msgEl.textContent = 'Code envoye a ' + email;
+      document.getElementById('forgotPwStep1').style.display = 'none';
+      document.getElementById('forgotPwStep2').style.display = 'block';
+    }
+  } catch(e) {
+    msgEl.style.color = '#f44';
+    msgEl.textContent = 'Erreur de connexion';
+  }
+}
+
+async function confirmResetPassword() {
+  var code = document.getElementById('resetCode').value.trim();
+  var newPw = document.getElementById('resetNewPw').value;
+  var email = document.getElementById('forgotEmail').value.trim();
+  var msgEl = document.getElementById('resetMsg');
+  if (!code || code.length !== 6) { msgEl.style.display = 'block'; msgEl.textContent = 'Code a 6 chiffres requis'; return; }
+  if (!newPw || newPw.length < 6) { msgEl.style.display = 'block'; msgEl.textContent = 'Minimum 6 caracteres'; return; }
+  try {
+    var resp = await fetch('https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/ibs-admin-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify_and_reset', email: email, code: code, new_password: newPw })
+    });
+    var data = await resp.json();
+    if (data.error) {
+      msgEl.style.display = 'block';
+      msgEl.style.color = '#f44';
+      msgEl.textContent = data.error;
+    } else {
+      ADMIN_PASSWORD = newPw;
+      localStorage.setItem('ibs_admin_pw', newPw);
+      document.getElementById('forgotPwStep2').style.display = 'none';
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('loginError').style.color = '#4CAF50';
+      document.getElementById('loginError').textContent = 'Mot de passe modifie ! Connectez-vous.';
+    }
+  } catch(e) {
+    msgEl.style.display = 'block';
+    msgEl.style.color = '#f44';
+    msgEl.textContent = 'Erreur de connexion';
+  }
 }
 
 // ===== TABS =====
