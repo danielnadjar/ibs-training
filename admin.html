@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back-office | IBS Formation - Coach Daniel</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a1a; color: #fff; min-height: 100vh; }
+
+/* ===== LOGIN OVERLAY ===== */
+#loginOverlay { position: fixed; inset: 0; background: #0a0a1a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.login-box { text-align: center; background: #1a1a2e; padding: 48px 40px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2); max-width: 400px; width: 90%; }
+.login-box h2 { font-size: 1.5rem; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+.login-box p { color: #aaa; font-size: 0.9rem; margin-bottom: 24px; }
+.login-box input { width: 100%; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 14px 18px; color: #fff; font-size: 1rem; outline: none; margin-bottom: 16px; text-align: center; }
+.login-box input:focus { border-color: #FFD700; }
+.login-box button { background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 12px; padding: 14px 32px; color: #000; font-weight: 700; cursor: pointer; font-size: 1rem; width: 100%; }
+.login-box button:hover { opacity: 0.9; }
+.login-error { color: #f44; font-size: 0.85rem; margin-top: 8px; display: none; }
+
+/* ===== HEADER ===== */
+.header { text-align: center; padding: 30px 20px 10px; }
+.coach-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #FFD700; object-fit: cover; margin: 0 auto 12px; display: block; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+.coach-avatar-fallback { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #FFD700; margin: 0 auto 12px; display: none; box-shadow: 0 0 20px rgba(255,215,0,0.3); background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-size: 2rem; font-weight: 800; line-height: 80px; text-align: center; }
+.header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+.header p { color: #aaa; font-size: 0.9rem; }
+
+/* ===== TABS ===== */
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding: 20px 20px 0; max-width: 1200px; margin: 0 auto; }
+.tab-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; padding: 10px 20px; border-radius: 10px 10px 0 0; cursor: pointer; font-size: 0.9rem; font-family: inherit; transition: all 0.2s; }
+.tab-btn:hover { background: rgba(255,215,0,0.1); color: #FFD700; }
+.tab-btn.active { background: #1a1a2e; color: #FFD700; border-color: rgba(255,215,0,0.3); border-bottom-color: #1a1a2e; font-weight: 600; }
+
+/* ===== KPI CARDS ===== */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 24px 20px; max-width: 1200px; margin: 0 auto; }
+.kpi-card { background: #1a1a2e; border-radius: 14px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.06); }
+.kpi-card .kpi-value { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.kpi-card .kpi-label { color: #888; font-size: 0.8rem; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ===== SECTIONS ===== */
+.section { display: none; max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+.section.active { display: block; }
+.section-title { font-size: 1.2rem; color: #FFD700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,215,0,0.15); }
+
+/* ===== TOOLBAR ===== */
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
+.toolbar input, .toolbar select { background: #2a2a3e; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.9rem; outline: none; font-family: inherit; }
+.toolbar input:focus, .toolbar select:focus { border-color: #FFD700; }
+.toolbar input { flex: 1; min-width: 200px; }
+.btn { background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 10px; padding: 10px 20px; color: #000; font-weight: 700; cursor: pointer; font-size: 0.85rem; font-family: inherit; white-space: nowrap; }
+.btn:hover { opacity: 0.9; }
+.btn-outline { background: transparent; border: 1px solid rgba(255,215,0,0.4); color: #FFD700; font-weight: 600; }
+.btn-outline:hover { background: rgba(255,215,0,0.1); opacity: 1; }
+.btn-sm { padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; }
+.btn-danger { background: linear-gradient(135deg, #f44, #d32f2f); color: #fff; }
+
+/* ===== TABLE ===== */
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
+table { width: 100%; border-collapse: collapse; background: #1a1a2e; }
+thead th { background: #12122a; color: #FFD700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 14px; text-align: left; cursor: pointer; user-select: none; white-space: nowrap; }
+thead th:hover { color: #FFA500; }
+thead th .sort-arrow { margin-left: 4px; font-size: 0.7rem; opacity: 0.5; }
+tbody td { padding: 10px 14px; font-size: 0.88rem; border-top: 1px solid rgba(255,255,255,0.04); color: #ccc; }
+tbody tr:hover { background: rgba(255,215,0,0.03); }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+.badge-purchase { background: rgba(76,175,80,0.15); color: #4CAF50; }
+.badge-usage { background: rgba(33,150,243,0.15); color: #2196F3; }
+.badge-signup_bonus { background: rgba(255,215,0,0.15); color: #FFD700; }
+.badge-admin_gift { background: rgba(156,39,176,0.15); color: #CE93D8; }
+.badge-refund { background: rgba(244,67,54,0.15); color: #f44; }
+
+/* ===== CONFIG ===== */
+.config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+.config-card { background: #1a1a2e; border-radius: 14px; padding: 24px; border: 1px solid rgba(255,255,255,0.06); }
+.config-card h3 { color: #FFD700; font-size: 1rem; margin-bottom: 12px; }
+.config-card label { display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 6px; }
+.config-card input { width: 100%; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.95rem; outline: none; margin-bottom: 14px; }
+.config-card input:focus { border-color: #FFD700; }
+
+/* ===== EXPORT ===== */
+.export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+.export-card { background: #1a1a2e; border-radius: 14px; padding: 28px; text-align: center; border: 1px solid rgba(255,255,255,0.06); }
+.export-card .export-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.export-card h3 { color: #fff; font-size: 1rem; margin-bottom: 8px; }
+.export-card p { color: #888; font-size: 0.8rem; margin-bottom: 16px; }
+
+/* ===== MODAL ===== */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: #1a1a2e; border-radius: 16px; padding: 32px; max-width: 450px; width: 90%; border: 1px solid rgba(255,215,0,0.2); }
+.modal h3 { color: #FFD700; margin-bottom: 16px; }
+.modal label { display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 6px; }
+.modal input { width: 100%; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.95rem; outline: none; margin-bottom: 14px; }
+.modal input:focus { border-color: #FFD700; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+
+/* ===== TOAST ===== */
+.toast { position: fixed; bottom: 30px; right: 30px; background: #1a1a2e; color: #fff; padding: 14px 24px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.3); font-size: 0.9rem; z-index: 5000; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-color: #4CAF50; }
+.toast.error { border-color: #f44; }
+
+/* ===== LOADING ===== */
+.loading { text-align: center; padding: 40px; color: #888; }
+.spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid rgba(255,215,0,0.2); border-top-color: #FFD700; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== PAGINATION ===== */
+.pagination { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+.pagination button { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-family: inherit; }
+.pagination button.active { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; border-color: transparent; font-weight: 700; }
+.pagination button:hover:not(.active) { background: rgba(255,215,0,0.1); color: #FFD700; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .tabs { gap: 4px; }
+  .tab-btn { padding: 8px 12px; font-size: 0.8rem; }
+  .toolbar { flex-direction: column; }
+  .toolbar input { min-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN OVERLAY ===== -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <img src="https://ibsformation.com/wp-content/uploads/2024/03/coach-daniel.webp" alt="Coach Daniel" style="width:80px;height:80px;border-radius:50%;border:3px solid #FFD700;object-fit:cover;margin:0 auto 16px;display:block;box-shadow:0 0 20px rgba(255,215,0,0.3);" onerror="this.style.display='none'">
+    <h2>Back-office IBS</h2>
+    <p>Acces reserve a l'administrateur</p>
+    <input type="password" id="loginPassword" placeholder="Mot de passe..." autofocus>
+    <button onclick="attemptLogin()">Connexion</button>
+    <div class="login-error" id="loginError">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP (hidden until login) ===== -->
+<div id="mainApp" style="display:none;">
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="https://ibsformation.com/wp-content/uploads/2024/03/coach-daniel.webp" alt="Coach Daniel" class="coach-avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <div class="coach-avatar-fallback">D</div>
+    <h1>Back-office IBS Formation</h1>
+    <p>Tableau de bord administrateur</p>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row" id="kpiRow">
+    <div class="kpi-card"><div class="kpi-value" id="kpiUsers">--</div><div class="kpi-label">Utilisateurs</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kpiCreditsSold">--</div><div class="kpi-label">Credits vendus</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kpiRevenue">--</div><div class="kpi-label">CA estime</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kpiCreditsUsed">--</div><div class="kpi-label">Credits consommes</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="kpiCreditsGifted">--</div><div class="kpi-label">Credits offerts</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('users')">Utilisateurs</button>
+    <button class="tab-btn" onclick="switchTab('transactions')">Transactions</button>
+    <button class="tab-btn" onclick="switchTab('reports')">Rapports</button>
+    <button class="tab-btn" onclick="switchTab('config')">Configuration</button>
+    <button class="tab-btn" onclick="switchTab('export')">Export</button>
+  </div>
+
+  <!-- ===== USERS SECTION ===== -->
+  <div class="section active" id="section-users">
+    <h2 class="section-title">Gestion des utilisateurs</h2>
+    <div class="toolbar">
+      <input type="text" id="userSearch" placeholder="Rechercher par nom ou email..." oninput="filterUsers()">
+      <button class="btn" onclick="loadUsers()">Actualiser</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortUsers('firstname')">Prenom <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortUsers('lastname')">Nom <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortUsers('email')">Email <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortUsers('phone')">Telephone</th>
+            <th onclick="sortUsers('credits')">Credits <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortUsers('created_at')">Inscription <span class="sort-arrow">&#9650;</span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="usersPagination"></div>
+  </div>
+
+  <!-- ===== TRANSACTIONS SECTION ===== -->
+  <div class="section" id="section-transactions">
+    <h2 class="section-title">Journal des transactions</h2>
+    <div class="toolbar">
+      <select id="txFilter" onchange="filterTransactions()">
+        <option value="">Tous les types</option>
+        <option value="purchase">Achat</option>
+        <option value="usage">Utilisation</option>
+        <option value="signup_bonus">Bonus inscription</option>
+        <option value="admin_gift">Cadeau admin</option>
+        <option value="refund">Remboursement</option>
+      </select>
+      <button class="btn" onclick="loadTransactions()">Actualiser</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTransactions('created_at')">Date <span class="sort-arrow">&#9650;</span></th>
+            <th>Utilisateur</th>
+            <th onclick="sortTransactions('type')">Type <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTransactions('amount')">Montant <span class="sort-arrow">&#9650;</span></th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody id="txBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="txPagination"></div>
+  </div>
+
+  <!-- ===== REPORTS SECTION ===== -->
+  <div class="section" id="section-reports">
+    <h2 class="section-title">Rapports generes</h2>
+    <div class="toolbar">
+      <input type="text" id="reportSearch" placeholder="Rechercher par outil ou utilisateur..." oninput="filterReports()">
+      <button class="btn" onclick="loadReports()">Actualiser</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortReports('created_at')">Date <span class="sort-arrow">&#9650;</span></th>
+            <th>Utilisateur</th>
+            <th onclick="sortReports('tool_name')">Outil <span class="sort-arrow">&#9650;</span></th>
+            <th>Resume</th>
+          </tr>
+        </thead>
+        <tbody id="reportsBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="reportsPagination"></div>
+  </div>
+
+  <!-- ===== CONFIG SECTION ===== -->
+  <div class="section" id="section-config">
+    <h2 class="section-title">Configuration</h2>
+    <div class="config-grid">
+      <div class="config-card">
+        <h3>Credits gratuits a l'inscription</h3>
+        <label>Nombre de credits offerts aux nouveaux utilisateurs</label>
+        <input type="number" id="cfgFreeCredits" min="0" value="3">
+        <button class="btn" onclick="saveConfigFreeCredits()">Enregistrer</button>
+      </div>
+      <div class="config-card">
+        <h3>Cout en credits par outil</h3>
+        <label>Credits par utilisation (estimation)</label>
+        <input type="number" id="cfgCreditCost" min="1" value="1">
+        <button class="btn" onclick="saveConfigCreditCost()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EXPORT SECTION ===== -->
+  <div class="section" id="section-export">
+    <h2 class="section-title">Export des donnees</h2>
+    <div class="export-grid">
+      <div class="export-card">
+        <div class="export-icon">&#128101;</div>
+        <h3>Utilisateurs</h3>
+        <p>Exporter la liste complete des utilisateurs</p>
+        <button class="btn" onclick="exportCSV('users')">Telecharger CSV</button>
+      </div>
+      <div class="export-card">
+        <div class="export-icon">&#128179;</div>
+        <h3>Transactions</h3>
+        <p>Exporter toutes les transactions de credits</p>
+        <button class="btn" onclick="exportCSV('transactions')">Telecharger CSV</button>
+      </div>
+      <div class="export-card">
+        <div class="export-icon">&#128196;</div>
+        <h3>Rapports</h3>
+        <p>Exporter tous les rapports d'estimation</p>
+        <button class="btn" onclick="exportCSV('reports')">Telecharger CSV</button>
+      </div>
+      <div class="export-card">
+        <div class="export-icon">&#128202;</div>
+        <h3>Google Sheet</h3>
+        <p>Synchroniser les donnees vers Google Sheets</p>
+        <button class="btn" onclick="syncGoogleSheet()">Sync to Google Sheet</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /mainApp -->
+
+<!-- ===== ADD CREDITS MODAL ===== -->
+<div class="modal-overlay" id="addCreditsModal">
+  <div class="modal">
+    <h3>Ajouter des credits</h3>
+    <label>Utilisateur</label>
+    <input type="text" id="modalUserEmail" readonly style="color:#888;">
+    <label>Nombre de credits</label>
+    <input type="number" id="modalCreditsAmount" min="1" value="5">
+    <label>Raison</label>
+    <input type="text" id="modalReason" placeholder="Cadeau, compensation..." value="Ajout manuel">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+      <button class="btn" onclick="confirmAddCredits()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================================
+// IBS Admin Dashboard
+// =====================================================================
+
+var ADMIN_PASSWORD = 'coachdaniel2024';
+var CREDITS_API = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/ibs-credits-api';
+var SUPABASE_REST = 'https://cbfypewsudbcuslhpkzx.supabase.co/rest/v1';
+var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZnlwZXdzdWRiY3VzbGhwa3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NjYxMTAsImV4cCI6MjA5MDQ0MjExMH0.GYkZF5GXFsSAlpcyMC7jz0bfzrACNv8YRFQJIG0ByKY';
+
+var ROWS_PER_PAGE = 20;
+
+// State
+var allUsers = [];
+var allTransactions = [];
+var allReports = [];
+var usersPage = 1;
+var txPage = 1;
+var reportsPage = 1;
+var usersSortField = 'created_at';
+var usersSortAsc = false;
+var txSortField = 'created_at';
+var txSortAsc = false;
+var reportsSortField = 'created_at';
+var reportsSortAsc = false;
+
+// ===== LOGIN =====
+document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') attemptLogin();
+});
+
+function attemptLogin() {
+  var pw = document.getElementById('loginPassword').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    loadAll();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginPassword').focus();
+  }
+}
+
+// ===== API HELPERS =====
+async function apiCall(data) {
+  var resp = await fetch(CREDITS_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  return await resp.json();
+}
+
+async function supabaseGet(table, query) {
+  var url = SUPABASE_REST + '/' + table + '?' + (query || 'select=*&order=created_at.desc');
+  var resp = await fetch(url, {
+    headers: {
+      'apikey': ANON_KEY,
+      'Authorization': 'Bearer ' + ANON_KEY
+    }
+  });
+  return await resp.json();
+}
+
+// ===== LOAD ALL DATA =====
+async function loadAll() {
+  await Promise.all([loadUsers(), loadTransactions(), loadReports(), loadConfig()]);
+  computeKPIs();
+}
+
+// ===== USERS =====
+async function loadUsers() {
+  try {
+    allUsers = await supabaseGet('ibs_users', 'select=*&order=created_at.desc');
+    if (!Array.isArray(allUsers)) allUsers = [];
+    usersPage = 1;
+    renderUsers();
+    computeKPIs();
+  } catch(e) {
+    console.error('loadUsers error:', e);
+    showToast('Erreur chargement utilisateurs', 'error');
+  }
+}
+
+function getFilteredUsers() {
+  var q = (document.getElementById('userSearch').value || '').toLowerCase();
+  var list = allUsers;
+  if (q) {
+    list = list.filter(function(u) {
+      return (u.firstname || '').toLowerCase().includes(q)
+        || (u.lastname || '').toLowerCase().includes(q)
+        || (u.email || '').toLowerCase().includes(q);
+    });
+  }
+  // Sort
+  list = list.slice().sort(function(a, b) {
+    var va = a[usersSortField] || '';
+    var vb = b[usersSortField] || '';
+    if (typeof va === 'number' && typeof vb === 'number') {
+      return usersSortAsc ? va - vb : vb - va;
+    }
+    va = String(va).toLowerCase();
+    vb = String(vb).toLowerCase();
+    if (va < vb) return usersSortAsc ? -1 : 1;
+    if (va > vb) return usersSortAsc ? 1 : -1;
+    return 0;
+  });
+  return list;
+}
+
+function renderUsers() {
+  var list = getFilteredUsers();
+  var start = (usersPage - 1) * ROWS_PER_PAGE;
+  var page = list.slice(start, start + ROWS_PER_PAGE);
+  var html = '';
+  if (page.length === 0) {
+    html = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#888;">Aucun utilisateur</td></tr>';
+  }
+  page.forEach(function(u) {
+    html += '<tr>'
+      + '<td>' + esc(u.firstname || '-') + '</td>'
+      + '<td>' + esc(u.lastname || '-') + '</td>'
+      + '<td>' + esc(u.email || '-') + '</td>'
+      + '<td>' + esc(u.phone || '-') + '</td>'
+      + '<td style="font-weight:700;color:#FFD700;">' + (u.credits || 0) + '</td>'
+      + '<td>' + formatDate(u.created_at) + '</td>'
+      + '<td><button class="btn btn-sm" onclick="openAddCredits(\'' + esc(u.email) + '\')">+ Credits</button></td>'
+      + '</tr>';
+  });
+  document.getElementById('usersBody').innerHTML = html;
+  renderPagination('usersPagination', list.length, usersPage, function(p) { usersPage = p; renderUsers(); });
+}
+
+function filterUsers() { usersPage = 1; renderUsers(); }
+
+function sortUsers(field) {
+  if (usersSortField === field) { usersSortAsc = !usersSortAsc; }
+  else { usersSortField = field; usersSortAsc = true; }
+  renderUsers();
+}
+
+// ===== TRANSACTIONS =====
+async function loadTransactions() {
+  try {
+    allTransactions = await supabaseGet('ibs_credit_transactions', 'select=*,ibs_users(firstname,lastname,email)&order=created_at.desc');
+    if (!Array.isArray(allTransactions)) allTransactions = [];
+    txPage = 1;
+    renderTransactions();
+    computeKPIs();
+  } catch(e) {
+    console.error('loadTransactions error:', e);
+    showToast('Erreur chargement transactions', 'error');
+  }
+}
+
+function getFilteredTransactions() {
+  var typeFilter = document.getElementById('txFilter').value;
+  var list = allTransactions;
+  if (typeFilter) {
+    list = list.filter(function(t) { return t.type === typeFilter; });
+  }
+  list = list.slice().sort(function(a, b) {
+    var va = a[txSortField] || '';
+    var vb = b[txSortField] || '';
+    if (typeof va === 'number' && typeof vb === 'number') {
+      return txSortAsc ? va - vb : vb - va;
+    }
+    va = String(va).toLowerCase();
+    vb = String(vb).toLowerCase();
+    if (va < vb) return txSortAsc ? -1 : 1;
+    if (va > vb) return txSortAsc ? 1 : -1;
+    return 0;
+  });
+  return list;
+}
+
+function renderTransactions() {
+  var list = getFilteredTransactions();
+  var start = (txPage - 1) * ROWS_PER_PAGE;
+  var page = list.slice(start, start + ROWS_PER_PAGE);
+  var html = '';
+  if (page.length === 0) {
+    html = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#888;">Aucune transaction</td></tr>';
+  }
+  page.forEach(function(t) {
+    var userName = '-';
+    if (t.ibs_users) {
+      userName = (t.ibs_users.firstname || '') + ' ' + (t.ibs_users.lastname || '') + ' (' + (t.ibs_users.email || '') + ')';
+    }
+    var badgeClass = 'badge-' + (t.type || 'usage');
+    var typeLabel = { purchase: 'Achat', usage: 'Utilisation', signup_bonus: 'Bonus', admin_gift: 'Cadeau', refund: 'Remboursement' }[t.type] || t.type;
+    var amountColor = (t.amount || 0) >= 0 ? '#4CAF50' : '#f44';
+    var amountPrefix = (t.amount || 0) >= 0 ? '+' : '';
+    html += '<tr>'
+      + '<td>' + formatDate(t.created_at) + '</td>'
+      + '<td>' + esc(userName) + '</td>'
+      + '<td><span class="badge ' + badgeClass + '">' + esc(typeLabel) + '</span></td>'
+      + '<td style="font-weight:700;color:' + amountColor + ';">' + amountPrefix + (t.amount || 0) + '</td>'
+      + '<td>' + esc(t.description || '-') + '</td>'
+      + '</tr>';
+  });
+  document.getElementById('txBody').innerHTML = html;
+  renderPagination('txPagination', list.length, txPage, function(p) { txPage = p; renderTransactions(); });
+}
+
+function filterTransactions() { txPage = 1; renderTransactions(); }
+
+function sortTransactions(field) {
+  if (txSortField === field) { txSortAsc = !txSortAsc; }
+  else { txSortField = field; txSortAsc = true; }
+  renderTransactions();
+}
+
+// ===== REPORTS =====
+async function loadReports() {
+  try {
+    allReports = await supabaseGet('ibs_reports', 'select=*,ibs_users(firstname,lastname,email)&order=created_at.desc');
+    if (!Array.isArray(allReports)) allReports = [];
+    reportsPage = 1;
+    renderReports();
+  } catch(e) {
+    console.error('loadReports error:', e);
+    showToast('Erreur chargement rapports', 'error');
+  }
+}
+
+function getFilteredReports() {
+  var q = (document.getElementById('reportSearch').value || '').toLowerCase();
+  var list = allReports;
+  if (q) {
+    list = list.filter(function(r) {
+      var userName = '';
+      if (r.ibs_users) userName = (r.ibs_users.firstname || '') + ' ' + (r.ibs_users.lastname || '') + ' ' + (r.ibs_users.email || '');
+      return (r.tool_name || '').toLowerCase().includes(q)
+        || (r.tool_slug || '').toLowerCase().includes(q)
+        || userName.toLowerCase().includes(q);
+    });
+  }
+  list = list.slice().sort(function(a, b) {
+    var va = a[reportsSortField] || '';
+    var vb = b[reportsSortField] || '';
+    va = String(va).toLowerCase();
+    vb = String(vb).toLowerCase();
+    if (va < vb) return reportsSortAsc ? -1 : 1;
+    if (va > vb) return reportsSortAsc ? 1 : -1;
+    return 0;
+  });
+  return list;
+}
+
+function renderReports() {
+  var list = getFilteredReports();
+  var start = (reportsPage - 1) * ROWS_PER_PAGE;
+  var page = list.slice(start, start + ROWS_PER_PAGE);
+  var html = '';
+  if (page.length === 0) {
+    html = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#888;">Aucun rapport</td></tr>';
+  }
+  page.forEach(function(r) {
+    var userName = '-';
+    if (r.ibs_users) {
+      userName = (r.ibs_users.firstname || '') + ' ' + (r.ibs_users.lastname || '');
+    }
+    var summary = (r.input_text || '').substring(0, 120);
+    if ((r.input_text || '').length > 120) summary += '...';
+    html += '<tr>'
+      + '<td>' + formatDate(r.created_at) + '</td>'
+      + '<td>' + esc(userName) + '</td>'
+      + '<td>' + esc(r.tool_name || r.tool_slug || '-') + '</td>'
+      + '<td style="font-size:0.82rem;color:#aaa;max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(summary) + '</td>'
+      + '</tr>';
+  });
+  document.getElementById('reportsBody').innerHTML = html;
+  renderPagination('reportsPagination', list.length, reportsPage, function(p) { reportsPage = p; renderReports(); });
+}
+
+function filterReports() { reportsPage = 1; renderReports(); }
+
+function sortReports(field) {
+  if (reportsSortField === field) { reportsSortAsc = !reportsSortAsc; }
+  else { reportsSortField = field; reportsSortAsc = true; }
+  renderReports();
+}
+
+// ===== CONFIG =====
+async function loadConfig() {
+  try {
+    var config = await supabaseGet('ibs_config', 'select=*');
+    if (Array.isArray(config)) {
+      config.forEach(function(c) {
+        if (c.key === 'free_credits') {
+          document.getElementById('cfgFreeCredits').value = c.value || 3;
+        }
+        if (c.key === 'credit_cost') {
+          document.getElementById('cfgCreditCost').value = c.value || 1;
+        }
+      });
+    }
+  } catch(e) {
+    console.error('loadConfig error:', e);
+  }
+}
+
+async function saveConfigFreeCredits() {
+  var val = parseInt(document.getElementById('cfgFreeCredits').value) || 3;
+  try {
+    var result = await apiCall({
+      action: 'admin_set_free_credits',
+      admin_key: ADMIN_PASSWORD,
+      amount: val
+    });
+    if (result.error) {
+      showToast('Erreur: ' + result.error, 'error');
+    } else {
+      showToast('Credits gratuits mis a jour: ' + val, 'success');
+    }
+  } catch(e) {
+    showToast('Erreur de connexion', 'error');
+  }
+}
+
+async function saveConfigCreditCost() {
+  var val = parseInt(document.getElementById('cfgCreditCost').value) || 1;
+  try {
+    // Use Supabase REST to upsert config
+    var resp = await fetch(SUPABASE_REST + '/ibs_config?key=eq.credit_cost', {
+      method: 'PATCH',
+      headers: {
+        'apikey': ANON_KEY,
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ value: String(val), updated_at: new Date().toISOString() })
+    });
+    if (resp.ok) {
+      showToast('Cout par outil mis a jour: ' + val, 'success');
+    } else {
+      // Try insert if row doesn't exist
+      await fetch(SUPABASE_REST + '/ibs_config', {
+        method: 'POST',
+        headers: {
+          'apikey': ANON_KEY,
+          'Authorization': 'Bearer ' + ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ key: 'credit_cost', value: String(val) })
+      });
+      showToast('Cout par outil cree: ' + val, 'success');
+    }
+  } catch(e) {
+    showToast('Erreur de connexion', 'error');
+  }
+}
+
+// ===== KPIs =====
+function computeKPIs() {
+  // Total users
+  document.getElementById('kpiUsers').textContent = allUsers.length;
+
+  // Credits sold (from purchase transactions)
+  var sold = 0, used = 0, gifted = 0;
+  allTransactions.forEach(function(t) {
+    if (t.type === 'purchase') sold += Math.abs(t.amount || 0);
+    if (t.type === 'usage') used += Math.abs(t.amount || 0);
+    if (t.type === 'signup_bonus' || t.type === 'admin_gift') gifted += Math.abs(t.amount || 0);
+  });
+  document.getElementById('kpiCreditsSold').textContent = sold;
+  document.getElementById('kpiCreditsUsed').textContent = used;
+  document.getElementById('kpiCreditsGifted').textContent = gifted;
+
+  // CA estimate: approximate based on credit packs pricing
+  // Pack prices: 5 credits = 9.90, 15 = 24.90, 50 = 69.90, 150 = 149.90
+  // Average ~1.50 per credit
+  var revenue = (sold * 1.50).toFixed(0);
+  document.getElementById('kpiRevenue').textContent = revenue + ' EUR';
+}
+
+// ===== ADD CREDITS MODAL =====
+function openAddCredits(email) {
+  document.getElementById('modalUserEmail').value = email;
+  document.getElementById('modalCreditsAmount').value = 5;
+  document.getElementById('modalReason').value = 'Ajout manuel';
+  document.getElementById('addCreditsModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('addCreditsModal').classList.remove('active');
+}
+
+async function confirmAddCredits() {
+  var email = document.getElementById('modalUserEmail').value;
+  var amount = parseInt(document.getElementById('modalCreditsAmount').value) || 0;
+  var reason = document.getElementById('modalReason').value || 'Ajout manuel';
+  if (amount <= 0) { showToast('Montant invalide', 'error'); return; }
+
+  try {
+    var result = await apiCall({
+      action: 'admin_add_credits',
+      admin_key: ADMIN_PASSWORD,
+      email: email,
+      amount: amount,
+      reason: reason
+    });
+    if (result.error) {
+      showToast('Erreur: ' + result.error, 'error');
+    } else {
+      showToast(amount + ' credits ajoutes a ' + email, 'success');
+      closeModal();
+      await Promise.all([loadUsers(), loadTransactions()]);
+    }
+  } catch(e) {
+    showToast('Erreur de connexion', 'error');
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('addCreditsModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ===== EXPORT CSV =====
+function exportCSV(type) {
+  var csv = '';
+  var filename = '';
+  if (type === 'users') {
+    csv = 'Prenom,Nom,Email,Telephone,Credits,Date inscription\n';
+    allUsers.forEach(function(u) {
+      csv += csvVal(u.firstname) + ',' + csvVal(u.lastname) + ',' + csvVal(u.email) + ','
+        + csvVal(u.phone) + ',' + (u.credits || 0) + ',' + formatDate(u.created_at) + '\n';
+    });
+    filename = 'ibs_utilisateurs_' + todayStr() + '.csv';
+  } else if (type === 'transactions') {
+    csv = 'Date,Utilisateur,Email,Type,Montant,Description\n';
+    allTransactions.forEach(function(t) {
+      var name = '-', email = '-';
+      if (t.ibs_users) {
+        name = (t.ibs_users.firstname || '') + ' ' + (t.ibs_users.lastname || '');
+        email = t.ibs_users.email || '';
+      }
+      csv += formatDate(t.created_at) + ',' + csvVal(name) + ',' + csvVal(email) + ','
+        + csvVal(t.type) + ',' + (t.amount || 0) + ',' + csvVal(t.description) + '\n';
+    });
+    filename = 'ibs_transactions_' + todayStr() + '.csv';
+  } else if (type === 'reports') {
+    csv = 'Date,Utilisateur,Outil,Resume\n';
+    allReports.forEach(function(r) {
+      var name = '-';
+      if (r.ibs_users) name = (r.ibs_users.firstname || '') + ' ' + (r.ibs_users.lastname || '');
+      csv += formatDate(r.created_at) + ',' + csvVal(name) + ',' + csvVal(r.tool_name || r.tool_slug)
+        + ',' + csvVal((r.input_text || '').substring(0, 200)) + '\n';
+    });
+    filename = 'ibs_rapports_' + todayStr() + '.csv';
+  }
+
+  var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  showToast('Export ' + type + ' telecharge', 'success');
+}
+
+async function syncGoogleSheet() {
+  showToast('Synchronisation en cours...', 'success');
+  try {
+    var result = await apiCall({
+      action: 'sync_google_sheet',
+      admin_key: ADMIN_PASSWORD
+    });
+    if (result.error) {
+      showToast('Erreur: ' + result.error, 'error');
+    } else {
+      showToast('Synchronisation Google Sheet terminee', 'success');
+    }
+  } catch(e) {
+    showToast('Erreur de connexion', 'error');
+  }
+}
+
+// ===== TABS =====
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.remove('active'); });
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('section-' + name).classList.add('active');
+  // Activate matching tab button
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    if (btn.textContent.toLowerCase().includes(name.substring(0, 4))) btn.classList.add('active');
+  });
+}
+
+// Fix tab activation
+function switchTab(name) {
+  var tabMap = { users: 'Utilisateurs', transactions: 'Transactions', reports: 'Rapports', config: 'Configuration', export: 'Export' };
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.textContent.trim() === tabMap[name]);
+  });
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('section-' + name).classList.add('active');
+}
+
+// ===== PAGINATION =====
+function renderPagination(containerId, totalItems, currentPage, onPageChange) {
+  var totalPages = Math.ceil(totalItems / ROWS_PER_PAGE);
+  var container = document.getElementById(containerId);
+  if (totalPages <= 1) { container.innerHTML = ''; return; }
+  var html = '';
+  // Prev
+  html += '<button ' + (currentPage <= 1 ? 'disabled style="opacity:0.3"' : '') + ' onclick="void(0)">&laquo;</button>';
+  for (var i = 1; i <= totalPages; i++) {
+    if (totalPages > 7 && i > 3 && i < totalPages - 1 && Math.abs(i - currentPage) > 1) {
+      if (i === 4 || i === totalPages - 2) html += '<button disabled style="opacity:0.3">...</button>';
+      continue;
+    }
+    html += '<button class="' + (i === currentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button>';
+  }
+  html += '<button ' + (currentPage >= totalPages ? 'disabled style="opacity:0.3"' : '') + ' onclick="void(0)">&raquo;</button>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('button[data-page]').forEach(function(btn) {
+    btn.addEventListener('click', function() { onPageChange(parseInt(this.dataset.page)); });
+  });
+  // Prev/Next
+  var buttons = container.querySelectorAll('button');
+  buttons[0].addEventListener('click', function() { if (currentPage > 1) onPageChange(currentPage - 1); });
+  buttons[buttons.length - 1].addEventListener('click', function() { if (currentPage < totalPages) onPageChange(currentPage + 1); });
+}
+
+// ===== UTILITY FUNCTIONS =====
+function esc(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function csvVal(str) {
+  if (!str) return '';
+  str = String(str);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+function formatDate(iso) {
+  if (!iso) return '-';
+  var d = new Date(iso);
+  var day = String(d.getDate()).padStart(2, '0');
+  var month = String(d.getMonth() + 1).padStart(2, '0');
+  var year = d.getFullYear();
+  var h = String(d.getHours()).padStart(2, '0');
+  var m = String(d.getMinutes()).padStart(2, '0');
+  return day + '/' + month + '/' + year + ' ' + h + ':' + m;
+}
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function showToast(msg, type) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + (type || '');
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 3500);
+}
+</script>
+</body>
+</html>
