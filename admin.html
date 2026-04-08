@@ -289,8 +289,8 @@ tbody tr:hover { background: rgba(255,215,0,0.03); }
       <div class="export-card">
         <div class="export-icon">&#128202;</div>
         <h3>Google Sheet</h3>
-        <p>Synchroniser les donnees vers Google Sheets</p>
-        <button class="btn" onclick="syncGoogleSheet()">Sync to Google Sheet</button>
+        <p>Copiez le script dans un Google Sheet pour sync automatique</p>
+        <button class="btn" onclick="showGoogleSheetScript()">Voir le script</button>
       </div>
     </div>
   </div>
@@ -782,21 +782,34 @@ function exportCSV(type) {
   showToast('Export ' + type + ' telecharge', 'success');
 }
 
-async function syncGoogleSheet() {
-  showToast('Synchronisation en cours...', 'success');
-  try {
-    var result = await apiCall({
-      action: 'sync_google_sheet',
-      admin_key: ADMIN_PASSWORD
-    });
-    if (result.error) {
-      showToast('Erreur: ' + result.error, 'error');
-    } else {
-      showToast('Synchronisation Google Sheet terminee', 'success');
-    }
-  } catch(e) {
-    showToast('Erreur de connexion', 'error');
-  }
+function showGoogleSheetScript() {
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = '<div style="background:#1a1a2e;border:1px solid #FFD700;border-radius:12px;padding:24px;max-width:600px;width:90%;max-height:80vh;overflow:auto;">'
+    + '<h3 style="color:#FFD700;margin-top:0;">Google Apps Script - Sync automatique</h3>'
+    + '<ol style="color:#ccc;font-size:14px;line-height:1.8;">'
+    + '<li>Creez un nouveau Google Sheet</li>'
+    + '<li>Menu <b>Extensions</b> > <b>Apps Script</b></li>'
+    + '<li>Collez le script ci-dessous</li>'
+    + '<li>Cliquez <b>Executer</b> > <b>syncAll</b></li>'
+    + '<li>Optionnel: ajoutez un declencheur pour sync auto</li>'
+    + '</ol>'
+    + '<button onclick="copyGSheetScript()" style="background:#FFD700;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;margin-bottom:12px;">Copier le script</button>'
+    + '<pre id="gsheetScriptPre" style="background:#0a0a1a;color:#0f0;padding:12px;border-radius:8px;font-size:11px;max-height:300px;overflow:auto;white-space:pre-wrap;">Chargement...</pre>'
+    + '<button onclick="this.closest(\'div[style]\').remove()" style="background:transparent;color:#888;border:1px solid #444;padding:8px 16px;border-radius:6px;cursor:pointer;margin-top:12px;">Fermer</button>'
+    + '</div>';
+  document.body.appendChild(modal);
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  fetch('google-sheet-sync.js').then(function(r) { return r.text(); }).then(function(t) {
+    document.getElementById('gsheetScriptPre').textContent = t;
+  });
+}
+
+function copyGSheetScript() {
+  var text = document.getElementById('gsheetScriptPre').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('Script copie dans le presse-papier', 'success');
+  });
 }
 
 // ===== TABS =====
