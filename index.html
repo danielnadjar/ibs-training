@@ -522,6 +522,7 @@ async function sendMessage() {
 // ===== DICTÉE VOCALE (Web Speech API) =====
 var recognition = null;
 var isRecording = false;
+var micPermissionGranted = false;
 
 function toggleMic() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -535,7 +536,31 @@ function toggleMic() {
   }
 }
 
-function startMic() {
+async function startMic() {
+  var input = document.getElementById('chatInput');
+  var micBtn = document.getElementById('micBtn');
+
+  // Demander la permission micro EXPLICITEMENT avant de lancer la reconnaissance
+  if (!micPermissionGranted) {
+    try {
+      input.placeholder = '🎤 Autorisation du micro...';
+      var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Permission accordée - on ferme le stream (Web Speech API gère le sien)
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      micPermissionGranted = true;
+    } catch(err) {
+      console.log('Micro permission denied:', err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        input.placeholder = 'Tapez ou dictez votre message...';
+        alert('Accès au micro refusé. Pour activer la dictée vocale : 1. Cliquez sur l\'icône cadenas dans la barre d\'adresse 2. Autorisez le microphone 3. Rechargez la page');
+      } else {
+        input.placeholder = 'Tapez ou dictez votre message...';
+        alert('Impossible d\'accéder au microphone : ' + err.message);
+      }
+      return;
+    }
+  }
+
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SpeechRecognition();
   recognition.lang = 'fr-FR';
@@ -543,12 +568,11 @@ function startMic() {
   recognition.interimResults = true;
 
   var finalTranscript = '';
-  var input = document.getElementById('chatInput');
 
   recognition.onstart = function() {
     isRecording = true;
-    document.getElementById('micBtn').classList.add('recording');
-    input.placeholder = '🔴 Parlez maintenant...';
+    micBtn.classList.add('recording');
+    input.placeholder = 'Parlez maintenant... (cliquez micro pour arreter)';
   };
 
   recognition.onresult = function(event) {
@@ -565,23 +589,38 @@ function startMic() {
 
   recognition.onerror = function(event) {
     console.log('Speech error:', event.error);
-    stopMic();
+    if (event.error === 'not-allowed') {
+      micPermissionGranted = false;
+      stopMic();
+      alert('Acces au micro refuse. Autorisez le microphone dans les parametres du navigateur, puis rechargez la page.');
+    } else if (event.error === 'no-speech') {
+      // Pas de parole detectee - on ne fait rien, onend relancera si besoin
+    } else if (event.error === 'aborted') {
+      stopMic();
+    } else {
+      stopMic();
+    }
   };
 
   recognition.onend = function() {
+    // NE PAS auto-envoyer - laisser l'utilisateur relire et envoyer manuellement
     if (isRecording) {
-      // Auto-send if we have text
-      if (input.value.trim().length > 3) {
-        stopMic();
-        sendMessage();
-      } else {
+      // La Web Speech API coupe apres ~60s de silence. On relance silencieusement.
+      try {
+        recognition.start();
+      } catch(e) {
         stopMic();
       }
     }
   };
 
   finalTranscript = '';
-  recognition.start();
+  try {
+    recognition.start();
+  } catch(e) {
+    console.log('Recognition start error:', e);
+    alert('Erreur au demarrage de la dictee vocale. Rechargez la page et reessayez.');
+  }
 }
 
 function stopMic() {
@@ -589,7 +628,7 @@ function stopMic() {
   document.getElementById('micBtn').classList.remove('recording');
   document.getElementById('chatInput').placeholder = 'Tapez ou dictez votre message...';
   if (recognition) {
-    recognition.stop();
+    try { recognition.onend = null; recognition.stop(); } catch(e) {}
     recognition = null;
   }
 }
@@ -853,9 +892,11 @@ function resetRecorder() {
   document.getElementById('btnCallAnnonce').style.transform = 'scale(1)';
 }
 
+var callRecRestartPending = false; // Guard anti-double-start
+
 function toggleCallRecording() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    alert('La reconnaissance vocale n\'est pas supportée par votre navigateur. Utilisez Chrome ou Edge.');
+    alert('La reconnaissance vocale n\'est pas supportee par votre navigateur. Utilisez Chrome ou Edge.');
     return;
   }
   if (isCallRecording) {
@@ -865,22 +906,47 @@ function toggleCallRecording() {
   }
 }
 
-function startCallRecording() {
+async function startCallRecording() {
+  var hint = document.getElementById('recordHint');
+
+  // Demander permission micro explicitement
+  if (!micPermissionGranted) {
+    try {
+      hint.textContent = 'Autorisation du microphone...';
+      var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      micPermissionGranted = true;
+    } catch(err) {
+      console.log('Micro permission denied:', err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        hint.textContent = 'Micro refuse - autorisez le micro dans les parametres du navigateur';
+        alert('Acces au micro refuse. Pour activer l\'enregistrement : 1. Cliquez sur l\'icone cadenas dans la barre d\'adresse 2. Autorisez le microphone 3. Rechargez la page');
+      } else {
+        hint.textContent = 'Erreur micro : ' + err.message;
+      }
+      return;
+    }
+  }
+
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   callRecognition = new SpeechRecognition();
   callRecognition.lang = 'fr-FR';
   callRecognition.continuous = true;
   callRecognition.interimResults = true;
+  callRecRestartPending = false;
 
   var finalText = '';
 
   callRecognition.onstart = function() {
     isCallRecording = true;
-    callStartTime = Date.now();
-    document.getElementById('bigMicBtn').textContent = '⏹️';
+    callRecRestartPending = false;
+    if (!callStartTime) {
+      callStartTime = Date.now();
+      callTimerInterval = setInterval(updateCallTimer, 1000);
+    }
+    document.getElementById('bigMicBtn').textContent = '\u23F9\uFE0F';
     document.getElementById('bigMicBtn').classList.add('rec');
-    document.getElementById('recordHint').textContent = '🔴 Enregistrement en cours... Parlez normalement';
-    callTimerInterval = setInterval(updateCallTimer, 1000);
+    hint.textContent = 'Enregistrement en cours... Parlez normalement';
   };
 
   callRecognition.onresult = function(event) {
@@ -897,45 +963,85 @@ function startCallRecording() {
 
   callRecognition.onerror = function(event) {
     console.log('Call recording error:', event.error);
-    if (event.error === 'no-speech') {
-      // Relancer automatiquement si pas de parole détectée
-      if (isCallRecording) {
-        try { callRecognition.start(); } catch(e) {}
-      }
+    if (event.error === 'not-allowed') {
+      micPermissionGranted = false;
+      stopCallRecording();
+      alert('Acces au micro refuse. Autorisez le microphone, puis rechargez la page.');
       return;
     }
+    if (event.error === 'no-speech') {
+      // Silence detecte - on laisse onend gerer le restart
+      return;
+    }
+    if (event.error === 'aborted') {
+      return; // Arret volontaire, pas d action
+    }
+    // Autre erreur : on arrete proprement
     stopCallRecording();
   };
 
   callRecognition.onend = function() {
-    // Relancer automatiquement si l'enregistrement est toujours actif
-    if (isCallRecording) {
-      try { callRecognition.start(); } catch(e) { stopCallRecording(); }
+    // Relancer automatiquement AVEC guard anti-double-start
+    if (isCallRecording && !callRecRestartPending) {
+      callRecRestartPending = true;
+      // Petit delai pour eviter la race condition
+      setTimeout(function() {
+        if (isCallRecording && callRecognition) {
+          try {
+            callRecognition.start();
+          } catch(e) {
+            console.log('Call rec restart failed:', e);
+            // Recreer une instance fraiche
+            try {
+              var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+              var newRec = new SR();
+              newRec.lang = callRecognition.lang;
+              newRec.continuous = callRecognition.continuous;
+              newRec.interimResults = callRecognition.interimResults;
+              newRec.onstart = callRecognition.onstart;
+              newRec.onresult = callRecognition.onresult;
+              newRec.onerror = callRecognition.onerror;
+              newRec.onend = callRecognition.onend;
+              callRecognition = newRec;
+              callRecognition.start();
+            } catch(e2) {
+              console.log('Call rec fresh instance failed:', e2);
+              stopCallRecording();
+            }
+          }
+        }
+        callRecRestartPending = false;
+      }, 300);
     }
   };
 
-  finalText = '';
-  callRecognition.start();
+  finalText = callTranscript || '';
+  try {
+    callRecognition.start();
+  } catch(e) {
+    console.log('Call recording start error:', e);
+    hint.textContent = 'Erreur au demarrage. Rechargez la page et reessayez.';
+  }
 }
 
 function stopCallRecording() {
   isCallRecording = false;
+  callRecRestartPending = false;
   clearInterval(callTimerInterval);
   callDuration = callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : 0;
-  document.getElementById('bigMicBtn').textContent = '🎙️';
+  document.getElementById('bigMicBtn').textContent = '\ud83c\udf99\ufe0f';
   document.getElementById('bigMicBtn').classList.remove('rec');
 
   if (callRecognition) {
-    callRecognition.onend = null; // Empêcher le redémarrage auto
-    callRecognition.stop();
+    try { callRecognition.onend = null; callRecognition.stop(); } catch(e) {}
     callRecognition = null;
   }
 
   if (callTranscript.trim().length > 20) {
-    document.getElementById('recordHint').textContent = '✅ Enregistrement terminé (' + formatDuration(callDuration) + ') — ' + callTranscript.split(' ').length + ' mots captés';
+    document.getElementById('recordHint').textContent = 'Enregistrement termine (' + formatDuration(callDuration) + ') - ' + callTranscript.split(' ').length + ' mots captes';
     document.getElementById('btnAnalyze').disabled = false;
   } else {
-    document.getElementById('recordHint').textContent = '⚠️ Pas assez de parole captée. Réessayez en parlant plus près du micro.';
+    document.getElementById('recordHint').textContent = 'Pas assez de parole captee. Reessayez en parlant plus pres du micro.';
     document.getElementById('btnAnalyze').disabled = true;
   }
 }
