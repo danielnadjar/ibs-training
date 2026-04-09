@@ -10,7 +10,7 @@
 // =====================================================================
 
 var SUPABASE_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/rest/v1';
-var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZnlwZXdzdWRiY3VzbGhwa3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NjYxMTAsImV4cCI6MjA5MDQ0MjExMH0.GYkZF5GXFsSAlpcyMC7jz0bfzrACNv8YRFQJIG0ByKY';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZnlwZXdzdWRiY3VzbGhwa3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTE4NDAsImV4cCI6MjA5MDM4Nzg0MH0.fhL3i5-gg2tPzI7Ezym4QO4YmPfHLsJgyyB65OGkZJg';
 
 function supabaseGet(table, select, order) {
   var url = SUPABASE_URL + '/' + table + '?select=' + encodeURIComponent(select || '*');

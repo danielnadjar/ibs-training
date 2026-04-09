@@ -361,7 +361,7 @@ tbody tr:hover { background: rgba(255,215,0,0.03); }
 var ADMIN_PASSWORD = localStorage.getItem('ibs_admin_pw') || 'coachdaniel2024';
 var CREDITS_API = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/ibs-credits-api';
 var SUPABASE_REST = 'https://cbfypewsudbcuslhpkzx.supabase.co/rest/v1';
-var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZnlwZXdzdWRiY3VzbGhwa3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NjYxMTAsImV4cCI6MjA5MDQ0MjExMH0.GYkZF5GXFsSAlpcyMC7jz0bfzrACNv8YRFQJIG0ByKY';
+var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZnlwZXdzdWRiY3VzbGhwa3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTE4NDAsImV4cCI6MjA5MDM4Nzg0MH0.fhL3i5-gg2tPzI7Ezym4QO4YmPfHLsJgyyB65OGkZJg';
 
 var ROWS_PER_PAGE = 20;
 
@@ -380,6 +380,31 @@ var reportsSortField = 'created_at';
 var reportsSortAsc = false;
 
 // ===== LOGIN =====
+// Auto-login si mot de passe sauvegardé
+(async function autoLogin() {
+  var savedPw = localStorage.getItem('ibs_admin_pw');
+  if (savedPw) {
+    var serverPw = null;
+    try {
+      var r = await fetch(SUPABASE_REST + '/ibs_config?key=eq.admin_password&select=value', {
+        headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY }
+      });
+      var d = await r.json();
+      if (d && d[0] && d[0].value) serverPw = d[0].value;
+    } catch(e) {}
+    var validPw = serverPw || 'coachdaniel2024';
+    if (savedPw === validPw) {
+      ADMIN_PASSWORD = savedPw;
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      loadAll();
+      return;
+    } else {
+      localStorage.removeItem('ibs_admin_pw');
+    }
+  }
+})();
+
 document.getElementById('loginPassword').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') attemptLogin();
 });
