@@ -186,10 +186,47 @@ var IBS = (function() {
     if (saved) {
       try {
         userProfile = JSON.parse(saved);
+        // Verify user exists server-side and sync
+        _verifyAndSync();
         return true;
       } catch(e) { return false; }
     }
     return false;
+  }
+
+  // Verify local profile exists in Supabase, force re-register if not
+  async function _verifyAndSync() {
+    if (!userProfile || !userProfile.email) return;
+    try {
+      var result = await _api({ action: 'get_user', email: userProfile.email });
+      if (result.user) {
+        // User exists in Supabase - sync credits
+        userProfile.id = result.user.id;
+        userProfile.credits = result.user.credits;
+        userProfile.firstname = result.user.firstname;
+        userProfile.lastname = result.user.lastname;
+        _save();
+      } else {
+        // User NOT in Supabase - try to auto-migrate
+        var regResult = await _api({
+          action: 'register',
+          firstname: userProfile.firstname || 'Utilisateur',
+          lastname: userProfile.lastname || '',
+          email: userProfile.email,
+          phone: userProfile.phone || ''
+        });
+        if (regResult.user) {
+          userProfile.id = regResult.user.id;
+          userProfile.credits = regResult.user.credits;
+          _save();
+        } else {
+          // Can't migrate - force logout to re-register properly
+          _clear();
+        }
+      }
+    } catch(e) {
+      // Network error - keep local profile, will retry next time
+    }
   }
 
   // ===== PUBLIC: LOGOUT =====
