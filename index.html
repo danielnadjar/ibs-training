@@ -130,12 +130,15 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   <h1>🎯 Entraînez-vous avec Daniel NADJAR le Coach</h1>
   <p>Perfectionnez vos compétences immobilières avec des coachs d'entraînement IA basés sur le cerveau virtuel de Daniel NADJAR.</p>
   <div class="stats-bar">
-    <div class="stat-item"><div class="stat-number">88</div><div class="stat-label">Vidéos analysées</div></div>
-    <div class="stat-item"><div class="stat-number">24M</div><div class="stat-label">Mots ingérés</div></div>
-    <div class="stat-item"><div class="stat-number">150h+</div><div class="stat-label">De contenu lu</div></div>
+    <div class="stat-item"><div class="stat-number" id="brainVideos">--</div><div class="stat-label">Vidéos analysées</div></div>
+    <div class="stat-item"><div class="stat-number" id="brainWords">--</div><div class="stat-label">Mots ingérés</div></div>
+    <div class="stat-item"><div class="stat-number" id="brainProgress">--%</div><div class="stat-label">Cerveau complet</div></div>
     <div class="stat-item"><div class="stat-number">25 ans</div><div class="stat-label">D'expérience terrain</div></div>
   </div>
-  <p class="stats-note">🤖 <span>Données mises à jour automatiquement chaque semaine</span></p>
+  <div style="max-width:400px;margin:8px auto;background:rgba(255,255,255,0.05);border-radius:10px;height:8px;overflow:hidden;">
+    <div id="brainBar" style="height:100%;background:linear-gradient(90deg,#FFD700,#FFA500);width:0%;transition:width 1.5s ease;border-radius:10px;"></div>
+  </div>
+  <p class="stats-note">🤖 <span id="brainStatus">Chargement des données du cerveau...</span></p>
 </div>
 <div class="usage-stats" id="usageStats">
   <div class="usage-stat">🤖 <span class="count" id="totalSessions">--</span> sessions d'entraînement</div>
@@ -219,7 +222,9 @@ var BOTS = [
   {slug:'negociation',name:'Coach Daniel - Négociation',description:'Développez vos talents de négociateur : objections, prix, conditions, closing... Basé sur les méthodes de Daniel NADJAR.',icon:'🤝',color_from:'#2196F3',color_to:'#1565C0',welcome:'Bienvenue ! Je suis Coach Daniel, votre expert en Négociation. En mode Jeu de rôle, je simule un client difficile. En mode Cours, je vous enseigne les meilleures techniques. Que préférez-vous ?'},
   {slug:'mandat',name:'Coach Daniel - Prise de Mandat',description:'Perfectionnez votre prise de mandat : R1, R2, estimation, exclusivité, closing... Basé sur les méthodes de Daniel NADJAR.',icon:'📝',color_from:'#9C27B0',color_to:'#6A1B9A',welcome:'Bienvenue ! Je suis Coach Daniel, votre expert en Prise de Mandat. Simulez un rendez-vous vendeur en Jeu de rôle ou apprenez les techniques en mode Cours. Par quoi commençons-nous ?'},
   {slug:'redaction',name:"Coach Daniel - Rédaction d'Annonces",description:'Rédigez des annonces qui convertissent : titres accrocheurs, descriptions vendeuses, SEO... Basé sur les méthodes de Daniel NADJAR.',icon:'✍️',color_from:'#FF9800',color_to:'#E65100',welcome:"Bienvenue ! Je suis Coach Daniel, votre expert en Rédaction d'Annonces. En Jeu de rôle, donnez-moi un bien et je vous aide à créer l'annonce parfaite. En Cours, je vous enseigne les secrets d'une annonce qui convertit."},
-  {slug:'investissement',name:'Coach Daniel - Rentabilité & Investissement',description:"Maîtrisez les calculs de rentabilité, cashflow, fiscalité et stratégies d'investissement. Basé sur les méthodes de Daniel NADJAR.",icon:'💰',color_from:'#F44336',color_to:'#B71C1C',welcome:"Bienvenue ! Je suis Coach Daniel, votre expert en Rentabilité & Investissement. En Jeu de rôle, apportez un cas concret à analyser. En Cours, je vous enseigne les bases du calcul de rentabilité et des stratégies d'investissement."}
+  {slug:'investissement',name:'Coach Daniel - Rentabilité & Investissement',description:"Maîtrisez les calculs de rentabilité, cashflow, fiscalité et stratégies d'investissement. Basé sur les méthodes de Daniel NADJAR.",icon:'💰',color_from:'#F44336',color_to:'#B71C1C',welcome:"Bienvenue ! Je suis Coach Daniel, votre expert en Rentabilité & Investissement. En Jeu de rôle, apportez un cas concret à analyser. En Cours, je vous enseigne les bases du calcul de rentabilité et des stratégies d'investissement."},
+  {slug:'coach-vie',name:'Coach Daniel - Coach de Vie',description:'Développement personnel, motivation, mindset, confiance en soi, gestion du stress, équilibre de vie. La philosophie de Daniel NADJAR.',icon:'🧠',color_from:'#9B59B6',color_to:'#8E44AD',welcome:"Salut ! 🧠 Ici le Coach de Vie. On va parler mindset, motivation et développement personnel. Qu'est-ce qui te tracasse ? Qu'est-ce que tu veux améliorer ? Dis-moi tout, je suis là pour te booster ! 💪"},
+  {slug:'stratege-business',name:'Coach Daniel - Stratège Business',description:"Stratégie d'entreprise, personal branding, marketing digital, réseaux sociaux, positionnement, développement commercial.",icon:'🎯',color_from:'#E67E22',color_to:'#D35400',welcome:"Salut ! 🎯 Ici le Stratège Business. Tu veux développer ton business ? Créer ta marque ? Exploser sur les réseaux ? Dis-moi ton objectif et je te fais un plan d'action ! 🚀"}
 ];
 var API_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/training-api';
 var currentBot = null;
@@ -374,7 +379,9 @@ function getModeChoices(mode, slug) {
       negociation: ['💰 Négocier le prix', '😤 Client difficile', '📉 Offre basse à défendre', '🤝 Closing final'],
       mandat: ['🏡 Premier rendez-vous (R1)', '📊 Présentation estimation (R2)', '✍️ Signature exclusivité', '😟 Vendeur hésitant'],
       redaction: ['🏢 Appartement en ville', '🏡 Maison avec jardin', '🏗️ Bien neuf (VEFA)', '💎 Bien de prestige'],
-      investissement: ['🏢 Immeuble de rapport', '📊 Calcul de rentabilité', '🏠 Premier investissement', '💼 Optimisation fiscale']
+      investissement: ['🏢 Immeuble de rapport', '📊 Calcul de rentabilité', '🏠 Premier investissement', '💼 Optimisation fiscale'],
+      'coach-vie': ['😰 Je doute de moi', '🔥 Je manque de motivation', '⚖️ Équilibre vie pro/perso', '💪 Booster ma confiance'],
+      'stratege-business': ['📱 Stratégie réseaux sociaux', '🏢 Créer mon agence', '🎥 Lancer ma chaîne YouTube', '👥 Recruter et manager']
     };
     return scenarios[slug] || ['🎯 Commencer un scénario'];
   } else {
@@ -383,7 +390,9 @@ function getModeChoices(mode, slug) {
       negociation: ['🧠 Psychologie de la négo', '🛡️ Traiter les objections', '💬 Techniques de closing', '📊 Stratégies de prix'],
       mandat: ['📝 Préparer son R1', '💰 Méthodes d\'estimation', '🎯 Obtenir l\'exclusivité', '📋 Du R1 au R2'],
       redaction: ['✏️ Structure d\'une annonce', '🎯 Titres accrocheurs', '📸 Photos qui vendent', '🔍 SEO immobilier'],
-      investissement: ['📊 Rendement brut vs net', '💶 Calcul du cashflow', '🏛️ Fiscalité immobilière', '📈 Stratégies patrimoniales']
+      investissement: ['📊 Rendement brut vs net', '💶 Calcul du cashflow', '🏛️ Fiscalité immobilière', '📈 Stratégies patrimoniales'],
+      'coach-vie': ['🧠 Développer un mindset de champion', '😤 Vaincre le syndrome de l\'imposteur', '🎯 Se fixer et atteindre ses objectifs', '🧘 Gérer le stress et la pression'],
+      'stratege-business': ['📈 Construire son personal branding', '📱 Marketing digital immobilier', '🎯 Se différencier de la concurrence', '💰 Diversifier ses revenus']
     };
     return cours[slug] || ['📖 Commencer le cours'];
   }
@@ -654,20 +663,34 @@ var ttsEnabled = false;
 var ttsCurrentUtterance = null;
 var ttsVoice = null;
 
-// Charger la meilleure voix française disponible
+// Charger la meilleure voix MASCULINE française disponible
 function loadBestFrenchVoice() {
   var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-  // Priorité : voix masculine française de haute qualité
+  // Mots-clés féminins à exclure
+  var feminin = ['female', 'femme', 'féminin', 'amelie', 'léa', 'marie', 'audrey', 'céline', 'julie', 'sara', 'alice', 'denise', 'virginie'];
+  function isFemale(name) {
+    var n = name.toLowerCase();
+    for (var f = 0; f < feminin.length; f++) { if (n.includes(feminin[f])) return true; }
+    return false;
+  }
+  // Priorité stricte : voix masculine française
   var priorities = [
     function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('thomas'); },
-    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('google') && !v.name.toLowerCase().includes('female'); },
-    function(v) { return v.lang === 'fr-FR' && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('homme')); },
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('henri'); },
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('daniel'); },
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('jacques'); },
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('pierre'); },
+    function(v) { return v.lang === 'fr-FR' && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('homme') || v.name.toLowerCase().includes('masculin')); },
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('google') && !isFemale(v.name); },
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('microsoft') && !isFemale(v.name); },
+    function(v) { return v.lang === 'fr-FR' && !isFemale(v.name); },
+    function(v) { return v.lang.startsWith('fr') && !isFemale(v.name); },
     function(v) { return v.lang === 'fr-FR'; },
     function(v) { return v.lang.startsWith('fr'); },
   ];
   for (var p = 0; p < priorities.length; p++) {
     for (var i = 0; i < voices.length; i++) {
-      if (priorities[p](voices[i])) { ttsVoice = voices[i]; return; }
+      if (priorities[p](voices[i])) { ttsVoice = voices[i]; console.log('TTS Voice: ' + voices[i].name + ' (' + voices[i].lang + ')'); return; }
     }
   }
   if (voices.length > 0) ttsVoice = voices[0];
@@ -743,8 +766,8 @@ function speakText(text, buttonEl) {
     }
     var utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
     utterance.lang = 'fr-FR';
-    utterance.rate = 1.05;   // Légèrement plus rapide pour être dynamique
-    utterance.pitch = 0.95;  // Voix légèrement plus grave
+    utterance.rate = 1.0;    // Vitesse naturelle de coach
+    utterance.pitch = 0.85;  // Voix grave masculine
     utterance.volume = 1;
     if (ttsVoice) utterance.voice = ttsVoice;
 
@@ -1031,6 +1054,71 @@ function getSimulatedLiveUsers() {
 }
 
 renderBots();
+
+// === COMPTEUR DU CERVEAU VIRTUEL (temps réel depuis Supabase) ===
+(function loadBrainStats() {
+  var SUPABASE_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/rest/v1';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiZnlwZXdzdWRiY3VzbGhwa3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTE4NDAsImV4cCI6MjA5MDM4Nzg0MH0.fhL3i5-gg2tPzI7Ezym4QO4YmPfHLsJgyyB65OGkZJg';
+
+  function fetchBrainStats() {
+    // Compter les videos avec transcription
+    fetch(SUPABASE_URL + '/chatbot_videos?select=transcript_available,transcript_text&transcript_available=eq.true&limit=1000', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var withTranscript = data.length;
+      var totalWords = 0;
+      data.forEach(function(v) {
+        if (v.transcript_text && v.transcript_text !== '__NO_TRANSCRIPT__') {
+          totalWords += v.transcript_text.split(/\s+/).length;
+        }
+      });
+
+      // Aussi compter le total
+      fetch(SUPABASE_URL + '/chatbot_videos?select=id', {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+      }).then(function(r) {
+        var range = r.headers.get('content-range') || '';
+        var total = parseInt(range.split('/')[1]) || 910;
+
+        var pct = Math.round((withTranscript / total) * 100);
+        var wordsDisplay = totalWords >= 1000000 ? Math.round(totalWords / 100000) / 10 + 'M' : Math.round(totalWords / 1000) + 'K';
+
+        var vidEl = document.getElementById('brainVideos');
+        var wordEl = document.getElementById('brainWords');
+        var pctEl = document.getElementById('brainProgress');
+        var barEl = document.getElementById('brainBar');
+        var statusEl = document.getElementById('brainStatus');
+
+        if (vidEl) vidEl.textContent = withTranscript + '/' + total;
+        if (wordEl) wordEl.textContent = wordsDisplay;
+        if (pctEl) pctEl.textContent = pct + '%';
+        if (barEl) barEl.style.width = pct + '%';
+
+        if (statusEl) {
+          if (pct >= 100) {
+            statusEl.textContent = '🧠 Cerveau virtuel complet ! Toutes les vidéos sont analysées.';
+          } else if (pct >= 50) {
+            statusEl.textContent = '🤖 3 robots extraient les transcriptions 24h/24 — ' + (total - withTranscript) + ' vidéos restantes';
+          } else {
+            statusEl.textContent = '🔄 Extraction en cours par 3 robots IA — ' + pct + '% du cerveau construit';
+          }
+        }
+      }).catch(function() {});
+    }).catch(function() {
+      // Fallback si erreur
+      var vidEl = document.getElementById('brainVideos');
+      if (vidEl) vidEl.textContent = '58+';
+      var pctEl = document.getElementById('brainProgress');
+      if (pctEl) pctEl.textContent = '~6%';
+      var statusEl = document.getElementById('brainStatus');
+      if (statusEl) statusEl.textContent = '🤖 3 robots extraient les transcriptions 24h/24';
+    });
+  }
+
+  fetchBrainStats();
+  // Rafraîchir toutes les 5 minutes
+  setInterval(fetchBrainStats, 300000);
+})();
 
 // Stats avec compteur simulé réaliste
 (function() {
