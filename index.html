@@ -49,6 +49,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .chat-input-area input:focus { border-color: #FFD700; }
 .chat-input-area button { background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 12px; padding: 12px 20px; color: #000; font-weight: 700; cursor: pointer; font-size: 1rem; }
 .chat-input-area button:hover { opacity: 0.9; }
+.speak-btn { background: rgba(255,255,255,0.08); border: none; color: #888; cursor: pointer; font-size: 0.85rem; padding: 4px 8px; border-radius: 8px; margin-top: 6px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+.speak-btn:hover { background: rgba(255,215,0,0.15); color: #FFD700; }
+.speak-btn.speaking { color: #FFD700; animation: pulse-speak 1.5s infinite; }
+@keyframes pulse-speak { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.tts-toggle { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 12px 14px; color: #aaa; cursor: pointer; font-size: 1.1rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.tts-toggle:hover { background: rgba(255,215,0,0.2); color: #FFD700; border-color: rgba(255,215,0,0.4); }
+.tts-toggle.active { background: rgba(255,215,0,0.2); border-color: #FFD700; color: #FFD700; }
 .mic-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 12px 14px; color: #aaa; cursor: pointer; font-size: 1.1rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
 .mic-btn:hover { background: rgba(255,215,0,0.2); color: #FFD700; border-color: rgba(255,215,0,0.4); }
 .mic-btn.recording { background: rgba(255,0,0,0.2); border-color: #f44; color: #f44; animation: pulse-mic 1s infinite; }
@@ -114,46 +121,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   .bots-grid { grid-template-columns: 1fr; padding: 20px 12px; }
   .chat-container { height: 95vh; border-radius: 12px; }
 }
-/* User bar & credits */
-.user-bar { display: none; justify-content: center; align-items: center; gap: 12px; padding: 8px 20px; margin-bottom: 8px; }
-.user-bar.active { display: flex; }
-.user-bar .user-info { background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.25); border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; color: #FFD700; display: flex; align-items: center; gap: 8px; }
-.user-bar .credits-badge { background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.3); border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; color: #4CAF50; font-weight: 600; cursor: pointer; }
-.user-bar .logout-btn { background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 6px 14px; color: #888; font-size: 0.8rem; cursor: pointer; }
-.user-bar .logout-btn:hover { color: #f44; border-color: rgba(255,0,0,0.3); }
-.register-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1200; justify-content: center; align-items: center; padding: 20px; }
-.register-overlay.active { display: flex; }
-.register-box { background: #1a1a2e; border-radius: 20px; padding: 40px; max-width: 480px; width: 100%; text-align: center; border: 1px solid rgba(255,215,0,0.2); position: relative; }
-.register-box h2 { font-size: 1.4rem; color: #FFD700; margin-bottom: 8px; }
-.register-box p { color: #aaa; font-size: 0.9rem; margin-bottom: 24px; line-height: 1.5; }
-.register-input { width: 100%; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 14px 18px; color: #fff; font-size: 1rem; outline: none; margin-bottom: 12px; }
-.register-input:focus { border-color: #FFD700; }
-.register-input.error { border-color: #f44; }
-.register-error { color: #f44; font-size: 0.8rem; margin-top: -8px; margin-bottom: 12px; display: none; }
-.register-submit { background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 12px; padding: 14px 32px; color: #000; font-weight: 700; cursor: pointer; font-size: 1rem; width: 100%; transition: opacity 0.2s; }
-.register-submit:hover { opacity: 0.9; }
-.register-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.register-close:hover { background: rgba(255,0,0,0.3); }
-.register-bonus { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.85rem; color: #4CAF50; }
-.credits-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1200; justify-content: center; align-items: center; padding: 20px; }
-.credits-overlay.active { display: flex; }
-.credits-box { background: #1a1a2e; border-radius: 20px; padding: 40px; max-width: 520px; width: 100%; text-align: center; border: 1px solid rgba(255,215,0,0.2); position: relative; }
-.credits-box h2 { font-size: 1.4rem; color: #FFD700; margin-bottom: 16px; }
-.credits-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.credits-close:hover { background: rgba(255,0,0,0.3); }
-.credit-packs { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-.credit-pack { display: flex; justify-content: space-between; align-items: center; background: #2a2a3e; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px; cursor: pointer; transition: all 0.2s; }
-.credit-pack:hover { border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.05); }
-.credit-pack .pack-info { text-align: left; }
-.credit-pack .pack-credits { font-size: 1.2rem; font-weight: 700; color: #FFD700; }
-.credit-pack .pack-desc { font-size: 0.8rem; color: #888; }
-.credit-pack .pack-price { font-size: 1.1rem; font-weight: 700; color: #4CAF50; }
-.no-credits-msg { text-align: center; padding: 12px; background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.2); border-radius: 12px; margin: 0 20px 12px; font-size: 0.85rem; color: #f88; display: none; }
-.email-sent-toast { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(76,175,80,0.95); color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 0.95rem; font-weight: 600; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-.email-sent-toast.show { display: block; animation: fadeInOut 3s ease; }
-@keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(20px); } 15% { opacity: 1; transform: translateX(-50%) translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; } }
 </style>
-<script src="ibs-auth.js"></script>
 </head>
 <body>
 <div class="header">
@@ -174,27 +142,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   <div class="usage-stat">⏱️ <span class="count" id="totalHours">--</span> heures de pratique</div>
   <div class="usage-stat"><span class="live-dot"></span> <span class="count" id="liveUsers">--</span> en ligne</div>
 </div>
-<div class="user-bar" id="userBar">
-  <div class="user-info"><span id="userGreeting">Bonjour</span></div>
-  <div class="credits-badge" id="creditsDisplay" onclick="openCreditsShop()">0 crédits</div>
-  <button class="logout-btn" onclick="openCreditsShop()" style="border-color:rgba(255,215,0,0.3);color:#FFD700;">Acheter des crédits</button>
-  <button class="logout-btn" onclick="logoutUser()">Déconnexion</button>
-</div>
 <div class="bots-grid" id="botsGrid"></div>
-<div class="cta-banner" style="border-color: rgba(33,150,243,0.3); background: linear-gradient(135deg, rgba(33,150,243,0.1), rgba(21,101,192,0.1));">
-  <h2 style="color: #2196F3;">Outils d'Estimation IA</h2>
-  <p>Estimez un bien immobilier, un fonds de commerce, une opération de marchand de biens ou le RBN d'une location saisonnière.</p>
-  <a href="estimation.html" style="background: linear-gradient(135deg, #2196F3, #1565C0);">Accéder aux Outils d'Estimation</a>
-</div>
 <div class="cta-banner">
   <h2>🚀 Besoin d'aller plus loin ?</h2>
   <p>Les formations complètes et le coaching personnalisé de Daniel NADJAR vous accompagnent vers l'excellence.</p>
   <a href="https://ia.ibsformation.com/" target="_blank">Découvrir les formations</a>
 </div>
-<div class="footer">
-  <p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits réservés</p>
-  <a href="admin.html" style="position:fixed;bottom:20px;right:20px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#FFD700;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;text-decoration:none;z-index:900;backdrop-filter:blur(8px);transition:all 0.3s;" onmouseover="this.style.background='rgba(255,215,0,0.3)';this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,215,0,0.15)';this.style.transform='rotate(0)'">&#9881;</a>
-</div>
+<div class="footer"><p>&copy; 2024 IBS Formation - Coach Daniel | Tous droits réservés</p></div>
 <div class="chat-overlay" id="chatOverlay">
   <div class="chat-container">
     <div class="chat-header">
@@ -212,6 +166,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
       <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Dictée vocale">🎙️</button>
       <input type="text" id="chatInput" placeholder="Tapez ou dictez votre message..." onkeypress="if(event.key==='Enter')sendMessage()">
       <button onclick="sendMessage()">Envoyer</button>
+      <button class="tts-toggle" id="ttsToggle" onclick="toggleAutoTTS()" title="Activer/désactiver la voix du coach">🔇</button>
     </div>
   </div>
 </div>
@@ -223,8 +178,22 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
       <button class="record-close" onclick="closeRecorder()">✕</button>
     </div>
     <div class="record-body">
-      <div class="record-context" style="text-align:center">
-        <label style="margin-bottom:10px;font-size:0.95rem;color:#ccc">Quel type d'appel allez-vous passer ?</label>
+      <div class="record-context">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+          <div style="flex:1;min-width:180px">
+            <label>Nom du contact</label>
+            <input type="text" id="contactName" placeholder="Ex: M. Dupont">
+          </div>
+          <div style="flex:1;min-width:180px">
+            <label>Téléphone</label>
+            <input type="text" id="contactPhone" placeholder="Ex: 06 12 34 56 78">
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <label>Email (optionnel)</label>
+          <input type="text" id="contactEmail" placeholder="Ex: dupont@email.com">
+        </div>
+        <label style="display:block;text-align:center;margin-bottom:10px;font-size:0.95rem;color:#ccc">Type d'appel</label>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
           <button id="btnCallProspect" class="choice-btn" onclick="selectCallType('prospection')" style="padding:14px 24px;font-size:1rem;border:2px solid rgba(255,215,0,0.4)">📞 Je prospecte</button>
           <button id="btnCallAnnonce" class="choice-btn" onclick="selectCallType('annonce')" style="padding:14px 24px;font-size:1rem;border:2px solid rgba(255,215,0,0.4)">📋 Je réponds à une annonce</button>
@@ -244,120 +213,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
     </div>
   </div>
 </div>
-<!-- Registration Modal -->
-<div class="register-overlay" id="registerOverlay">
-  <div class="register-box">
-    <button class="register-close" onclick="closeRegister()">&#10005;</button>
-    <div style="font-size:3rem; margin-bottom:16px;">&#128075;</div>
-    <h2>Bienvenue sur les Bots d'Entraînement</h2>
-    <p>Créez votre compte gratuit pour accéder aux bots et aux outils d'estimation.</p>
-    <div class="register-bonus" id="registerBonus">&#127873; 3 crédits offerts à l'inscription !</div>
-    <input type="text" class="register-input" id="registerFirstname" placeholder="Prénom" onkeypress="if(event.key==='Enter')document.getElementById('registerLastname').focus()">
-    <input type="text" class="register-input" id="registerLastname" placeholder="Nom" onkeypress="if(event.key==='Enter')document.getElementById('registerEmail').focus()">
-    <input type="email" class="register-input" id="registerEmail" placeholder="Adresse email" onkeypress="if(event.key==='Enter')document.getElementById('registerPhone').focus()">
-    <input type="tel" class="register-input" id="registerPhone" placeholder="Téléphone (ex: 06 12 34 56 78)" onkeypress="if(event.key==='Enter')submitRegister()">
-    <div class="register-error" id="registerError">Veuillez remplir tous les champs avec un email valide.</div>
-    <button class="register-submit" onclick="submitRegister()">Créer mon compte gratuit</button>
-  </div>
-</div>
-<!-- Credits Shop Modal -->
-<div class="credits-overlay" id="creditsOverlay">
-  <div class="credits-box">
-    <button class="credits-close" onclick="closeCreditsShop()">&#10005;</button>
-    <h2>Acheter des crédits</h2>
-    <p style="color:#aaa; font-size:0.9rem; margin-bottom:8px;">1 crédit = 1 session d'entraînement ou 1 analyse</p>
-    <p style="color:#888; font-size:0.8rem; margin-bottom:16px;">Solde actuel : <strong style="color:#4CAF50;" id="creditsShopBalance">0</strong> crédits</p>
-    <div class="credit-packs">
-      <div class="credit-pack" onclick="buyCredits(0)"><div class="pack-info"><div class="pack-credits">5 crédits</div><div class="pack-desc">Idéal pour tester</div></div><div class="pack-price">4,99 EUR</div></div>
-      <div class="credit-pack" onclick="buyCredits(1)"><div class="pack-info"><div class="pack-credits">15 crédits</div><div class="pack-desc">Le plus populaire</div></div><div class="pack-price">9,99 EUR</div></div>
-      <div class="credit-pack" onclick="buyCredits(2)"><div class="pack-info"><div class="pack-credits">50 crédits</div><div class="pack-desc">Pour les pros</div></div><div class="pack-price">24,99 EUR</div></div>
-      <div class="credit-pack" onclick="buyCredits(3)"><div class="pack-info"><div class="pack-credits">150 crédits</div><div class="pack-desc">Pack agence / investisseur</div></div><div class="pack-price">59,99 EUR</div></div>
-    </div>
-    <p style="color:#555; font-size:0.75rem; margin-top:16px;">Paiement sécurisé. Les crédits n'expirent pas.</p>
-  </div>
-</div>
-<div class="no-credits-msg" id="noCreditsMsg">Crédits insuffisants. <a href="#" onclick="openCreditsShop();return false" style="color:#FFD700;text-decoration:underline">Rechargez vos crédits</a> pour continuer.</div>
-<div class="email-sent-toast" id="emailToast"></div>
 <script>
-// ===================== SHARED AUTH (ibs-auth.js) =====================
-var pendingBotSlug = null;
-
-function showToast(message) {
-  var toast = document.getElementById('emailToast');
-  if (!toast) return;
-  toast.textContent = message; toast.classList.remove('show');
-  void toast.offsetWidth; toast.classList.add('show');
-  setTimeout(function() { toast.classList.remove('show'); }, 3500);
-}
-
-function updateCreditsDisplay() {
-  var credits = IBS.getCredits();
-  var label = credits + ' crédit' + (credits > 1 ? 's' : '');
-  var el = document.getElementById('creditsDisplay'); if (el) el.textContent = label;
-  var el2 = document.getElementById('creditsShopBalance'); if (el2) el2.textContent = credits;
-}
-
-function showUserBar() {
-  var user = IBS.getUser();
-  if (!user) return;
-  document.getElementById('userBar').classList.add('active');
-  document.getElementById('userGreeting').textContent = 'Bonjour ' + user.firstname + ' ' + (user.lastname || '') + ' !';
-  updateCreditsDisplay();
-}
-
-function logoutUser() { IBS.logout(); document.getElementById('userBar').classList.remove('active'); }
-
-function openRegister() {
-  ['registerFirstname','registerLastname','registerEmail','registerPhone'].forEach(function(id) {
-    var el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('error'); }
-  });
-  document.getElementById('registerError').style.display = 'none';
-  document.getElementById('registerOverlay').classList.add('active');
-  document.getElementById('registerFirstname').focus();
-}
-function closeRegister() { document.getElementById('registerOverlay').classList.remove('active'); }
-
-async function submitRegister() {
-  var firstname = document.getElementById('registerFirstname').value.trim();
-  var lastname = document.getElementById('registerLastname').value.trim();
-  var email = document.getElementById('registerEmail').value.trim();
-  var phone = document.getElementById('registerPhone').value.trim();
-  ['registerFirstname','registerLastname','registerEmail','registerPhone'].forEach(function(id) { document.getElementById(id).classList.remove('error'); });
-  var hasError = false;
-  if (!firstname) { document.getElementById('registerFirstname').classList.add('error'); hasError = true; }
-  if (!lastname) { document.getElementById('registerLastname').classList.add('error'); hasError = true; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('registerEmail').classList.add('error'); hasError = true; }
-  if (!phone || phone.length < 8) { document.getElementById('registerPhone').classList.add('error'); hasError = true; }
-  if (hasError) { document.getElementById('registerError').style.display = 'block'; return; }
-
-  var result = await IBS.register(firstname, lastname, email, phone);
-  if (result.success) {
-    closeRegister(); showUserBar();
-    var msg = result.message === 'Connexion réussie'
-      ? 'Content de vous revoir ' + firstname + ' !'
-      : 'Bienvenue ' + firstname + ' ! ' + (result.free_credits || IBS.getCredits()) + ' crédits offerts.';
-    showToast(msg);
-    if (pendingBotSlug) { openChat(pendingBotSlug); pendingBotSlug = null; }
-  } else {
-    showToast('Erreur: ' + (result.error || 'Réessayez'));
-  }
-}
-
-function openCreditsShop() {
-  var el = document.getElementById('creditsShopBalance'); if (el) el.textContent = IBS.getCredits();
-  document.getElementById('creditsOverlay').classList.add('active');
-}
-function closeCreditsShop() { document.getElementById('creditsOverlay').classList.remove('active'); }
-
-async function buyCredits(packIndex) {
-  closeCreditsShop();
-  showToast('Redirection vers le paiement...');
-  var result = await IBS.buyCredits(packIndex);
-  if (!result.success && !result.redirecting) {
-    showToast(result.error || 'Erreur. Contactez contact@ibsformation.com');
-  }
-}
-
 var BOTS = [
   {slug:'prospection',name:'Coach Daniel - Prospection',description:'Maîtrisez la prospection immobilière : porte-à-porte, téléphone, digital, pige... Basé sur les méthodes de Daniel NADJAR.',icon:'🔍',color_from:'#4CAF50',color_to:'#2E7D32',welcome:'Bienvenue ! Je suis Coach Daniel, votre expert en Prospection. Choisissez un mode : Jeu de rôle pour simuler des situations réelles, ou Cours pour apprendre les techniques. Quel mode préférez-vous ?'},
   {slug:'negociation',name:'Coach Daniel - Négociation',description:'Développez vos talents de négociateur : objections, prix, conditions, closing... Basé sur les méthodes de Daniel NADJAR.',icon:'🤝',color_from:'#2196F3',color_to:'#1565C0',welcome:'Bienvenue ! Je suis Coach Daniel, votre expert en Négociation. En mode Jeu de rôle, je simule un client difficile. En mode Cours, je vous enseigne les meilleures techniques. Que préférez-vous ?'},
@@ -369,12 +225,6 @@ var API_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/training-ap
 var currentBot = null;
 var currentMode = 'roleplay';
 var sessionId = null;
-
-// Shared user profile with estimation tools
-function getSharedProfile() {
-  var saved = localStorage.getItem('ibs_user_profile');
-  return saved ? JSON.parse(saved) : null;
-}
 
 function renderBots() {
   var grid = document.getElementById('botsGrid');
@@ -404,14 +254,6 @@ function openChat(slug) {
   currentBot = null;
   for (var i = 0; i < BOTS.length; i++) { if (BOTS[i].slug === slug) currentBot = BOTS[i]; }
   if (!currentBot) return;
-  if (!IBS.isLoggedIn()) { pendingBotSlug = slug; openRegister(); return; }
-  if (IBS.getCredits() < 1) {
-    openCreditsShop();
-    showToast('Crédits insuffisants. Rechargez pour continuer.');
-    return;
-  }
-  // Deduct credit via API
-  IBS.useCredit(currentBot.slug, currentBot.name, 1).then(function() { updateCreditsDisplay(); });
   sessionId = 'train_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   currentMode = 'roleplay';
   document.getElementById('chatBotIcon').textContent = currentBot.icon;
@@ -428,6 +270,7 @@ function openChat(slug) {
 
 function closeChat() {
   clearChoices();
+  stopTTS();
   document.getElementById('chatOverlay').classList.remove('active');
   currentBot = null;
   sessionId = null;
@@ -452,8 +295,23 @@ function addMessage(text, type) {
   var div = document.createElement('div');
   div.className = 'msg ' + type;
   div.innerHTML = formatText(text);
+
+  // Ajouter bouton "Écouter" sur les messages du bot
+  if (type === 'bot' && window.speechSynthesis) {
+    var speakBtn = document.createElement('button');
+    speakBtn.className = 'speak-btn';
+    speakBtn.textContent = '🔊 Écouter';
+    speakBtn.onclick = function() { speakText(text, speakBtn); };
+    div.appendChild(speakBtn);
+  }
+
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+
+  // Lecture automatique si TTS activé
+  if (type === 'bot' && ttsEnabled && window.speechSynthesis) {
+    setTimeout(function() { speakText(text, div.querySelector('.speak-btn')); }, 300);
+  }
 }
 
 function clearChoices() {
@@ -791,6 +649,137 @@ closeChat = function() {
   _originalCloseChat();
 };
 
+// ===== SYNTHÈSE VOCALE (TTS) - Coach Daniel parle =====
+var ttsEnabled = false;
+var ttsCurrentUtterance = null;
+var ttsVoice = null;
+
+// Charger la meilleure voix française disponible
+function loadBestFrenchVoice() {
+  var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  // Priorité : voix masculine française de haute qualité
+  var priorities = [
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('thomas'); },
+    function(v) { return v.lang === 'fr-FR' && v.name.toLowerCase().includes('google') && !v.name.toLowerCase().includes('female'); },
+    function(v) { return v.lang === 'fr-FR' && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('homme')); },
+    function(v) { return v.lang === 'fr-FR'; },
+    function(v) { return v.lang.startsWith('fr'); },
+  ];
+  for (var p = 0; p < priorities.length; p++) {
+    for (var i = 0; i < voices.length; i++) {
+      if (priorities[p](voices[i])) { ttsVoice = voices[i]; return; }
+    }
+  }
+  if (voices.length > 0) ttsVoice = voices[0];
+}
+
+if (window.speechSynthesis) {
+  loadBestFrenchVoice();
+  window.speechSynthesis.onvoiceschanged = loadBestFrenchVoice;
+}
+
+function toggleAutoTTS() {
+  ttsEnabled = !ttsEnabled;
+  var btn = document.getElementById('ttsToggle');
+  if (ttsEnabled) {
+    btn.textContent = '🔊';
+    btn.classList.add('active');
+    btn.title = 'Voix du coach activée (cliquez pour couper)';
+  } else {
+    btn.textContent = '🔇';
+    btn.classList.remove('active');
+    btn.title = 'Activer la voix du coach';
+    stopTTS();
+  }
+}
+
+function speakText(text, buttonEl) {
+  if (!window.speechSynthesis) return;
+  // Nettoyer le texte pour la lecture
+  var clean = text
+    .replace(/<[^>]+>/g, ' ')         // Supprimer HTML
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Supprimer markdown bold
+    .replace(/https?:\/\/[^\s]+/g, '') // Supprimer URLs
+    .replace(/SCORE:\s*\d+\/\d+/gi, function(m) { return m.replace('/', ' sur '); })
+    .replace(/📊|🎯|💡|🔑|✅|❌|⚠️|📞|🏠|💰|🤝|📝|✍️|🔍|📖|🔄|❓|💬|🎭|📚|🚀|🎙️|🔴|🤖/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!clean) return;
+
+  // Si déjà en train de parler, arrêter
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (buttonEl) {
+      buttonEl.textContent = '🔊 Écouter';
+      buttonEl.classList.remove('speaking');
+    }
+    return;
+  }
+
+  // Découper en morceaux de ~200 caractères (limite de certains navigateurs)
+  var chunks = [];
+  var sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+  var current = '';
+  for (var i = 0; i < sentences.length; i++) {
+    if ((current + sentences[i]).length > 200 && current.length > 0) {
+      chunks.push(current.trim());
+      current = sentences[i];
+    } else {
+      current += sentences[i];
+    }
+  }
+  if (current.trim()) chunks.push(current.trim());
+
+  var chunkIndex = 0;
+
+  function speakNextChunk() {
+    if (chunkIndex >= chunks.length) {
+      if (buttonEl) {
+        buttonEl.textContent = '🔊 Écouter';
+        buttonEl.classList.remove('speaking');
+      }
+      return;
+    }
+    var utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
+    utterance.lang = 'fr-FR';
+    utterance.rate = 1.05;   // Légèrement plus rapide pour être dynamique
+    utterance.pitch = 0.95;  // Voix légèrement plus grave
+    utterance.volume = 1;
+    if (ttsVoice) utterance.voice = ttsVoice;
+
+    utterance.onend = function() {
+      chunkIndex++;
+      speakNextChunk();
+    };
+    utterance.onerror = function() {
+      chunkIndex++;
+      speakNextChunk();
+    };
+
+    ttsCurrentUtterance = utterance;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  if (buttonEl) {
+    buttonEl.textContent = '⏹️ Stop';
+    buttonEl.classList.add('speaking');
+  }
+  speakNextChunk();
+}
+
+function stopTTS() {
+  if (window.speechSynthesis && window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+  }
+  // Reset tous les boutons speak
+  var btns = document.querySelectorAll('.speak-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].textContent = '🔊 Écouter';
+    btns[i].classList.remove('speaking');
+  }
+}
+
 // ===== MODULE ENREGISTREMENT & ANALYSE D'APPEL =====
 var callRecognition = null;
 var isCallRecording = false;
@@ -812,13 +801,6 @@ function selectCallType(type) {
 }
 
 function openRecorder() {
-  if (!IBS.isLoggedIn()) { pendingBotSlug = null; openRegister(); return; }
-  if (IBS.getCredits() < 1) {
-    openCreditsShop();
-    showToast('Crédits insuffisants. Rechargez pour continuer.');
-    return;
-  }
-  IBS.useCredit('analyseur-appel', 'Analyseur d\'Appel', 1).then(function() { updateCreditsDisplay(); });
   document.getElementById('recordOverlay').classList.add('active');
   resetRecorder();
 }
@@ -833,8 +815,11 @@ function resetRecorder() {
   callDuration = 0;
   selectedCallType = '';
   document.getElementById('callType').value = '';
+  document.getElementById('contactName').value = '';
+  document.getElementById('contactPhone').value = '';
+  document.getElementById('contactEmail').value = '';
   document.getElementById('recordTimer').textContent = '00:00';
-  document.getElementById('recordHint').textContent = 'Choisissez le type d\'appel puis appuyez sur le micro';
+  document.getElementById('recordHint').textContent = 'Remplissez les infos contact, choisissez le type, puis enregistrez';
   document.getElementById('bigMicBtn').textContent = '🎙️';
   document.getElementById('bigMicBtn').classList.remove('rec');
   document.getElementById('btnAnalyze').disabled = true;
@@ -982,7 +967,15 @@ async function analyzeCall() {
     var data = await resp.json();
     if (data.reply) {
       var clean = cleanReply(data.reply);
-      resultDiv.innerHTML = '<div class="analysis-result"><h4>🎯 Analyse de Coach Daniel</h4>' + formatText(clean) + '</div>';
+      resultDiv.innerHTML = '<div class="analysis-result"><h4>🎯 Analyse de Coach Daniel</h4>' + formatText(clean) + '<br><button class="speak-btn" id="analysisSpeak" style="margin-top:10px">🔊 Écouter l\'analyse</button></div>';
+      // Attacher le listener proprement pour éviter les problèmes d'échappement
+      var lastAnalysisText = clean;
+      document.getElementById('analysisSpeak').onclick = function() { speakText(lastAnalysisText, this); };
+      // Extraire le score de l'analyse
+      var scoreMatch = clean.match(/(\d+)\s*\/\s*10/);
+      var extractedScore = scoreMatch ? scoreMatch[1] + '/10' : '';
+      // Sauvegarder dans Supabase
+      saveCallLog(clean, extractedScore);
     } else {
       resultDiv.innerHTML = '<div class="analysis-result"><h4>❌ Erreur</h4><p>Impossible d\'obtenir l\'analyse. Réessayez.</p></div>';
     }
@@ -991,6 +984,34 @@ async function analyzeCall() {
   }
 
   document.getElementById('btnAnalyze').disabled = false;
+}
+
+var LOGGER_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/functions/v1/call-logger';
+
+function saveCallLog(analysis, score) {
+  var payload = {
+    contact_name: document.getElementById('contactName').value.trim() || 'Inconnu',
+    contact_phone: document.getElementById('contactPhone').value.trim(),
+    contact_email: document.getElementById('contactEmail').value.trim(),
+    call_type: selectedCallType || 'prospection',
+    call_duration_seconds: callDuration,
+    transcript: callTranscript.trim(),
+    analysis: analysis,
+    score: score,
+    notes: ''
+  };
+
+  fetch(LOGGER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer coachdaniel2024' },
+    body: JSON.stringify(payload)
+  }).then(function(resp) { return resp.json(); })
+    .then(function(data) {
+      if (data.success) {
+        var resultDiv = document.getElementById('analysisResult');
+        resultDiv.innerHTML += '<div style="text-align:center;margin-top:12px;padding:8px;background:rgba(76,175,80,0.15);border-radius:8px;color:#4CAF50;font-size:0.85rem">✅ Appel sauvegardé dans votre base de contacts</div>';
+      }
+    }).catch(function(e) { console.log('Erreur sauvegarde:', e); });
 }
 
 // ===== FIX COMPTEUR SIMULÉ RÉALISTE =====
@@ -1033,22 +1054,6 @@ renderBots();
   setInterval(function() {
     liveEl.textContent = getSimulatedLiveUsers();
   }, 300000);
-})();
-// ===== INIT =====
-(async function() {
-  if (IBS.loadProfile()) {
-    showUserBar();
-    await IBS.sync();
-    updateCreditsDisplay();
-  }
-  var payment = await IBS.checkPaymentReturn();
-  if (payment && payment.paid) {
-    updateCreditsDisplay();
-    showToast(payment.credits + ' crédits ajoutés !');
-  }
-  var config = await IBS.getConfig();
-  var el = document.getElementById('registerBonus');
-  if (el && config.free_credits) el.innerHTML = '&#127873; ' + config.free_credits + ' crédits offerts à l\'inscription !';
 })();
 </script>
 </body>
