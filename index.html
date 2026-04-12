@@ -1115,38 +1115,33 @@ renderBots();
 
 // === COMPTEUR DU CERVEAU VIRTUEL (temps réel depuis Supabase) ===
 (function loadBrainStats() {
+      function fetchBrainStats() {
+        fetch(SUPABASE_URL + '/functions/v1/cerveau-stats').then(function(resp) {
+          return resp.json();
+        }).then(function(s) {
+          var vEl = document.getElementById('brainVideos');
+          var wEl = document.getElementById('brainWords');
+          var pEl = document.getElementById('brainProgress');
+          var bEl = document.getElementById('brainBar');
+          var sEl = document.getElementById('brainStatus');
+          var pcEl = document.getElementById('brainPodcasts');
+          if (vEl) vEl.textContent = s.videos.transcrites + '/' + s.videos.total;
+          if (wEl) wEl.textContent = s.global.mots_formates;
+          if (pEl) pEl.textContent = s.global.cerveau_pct + '%';
+          if (bEl) bEl.style.width = s.global.cerveau_pct + '%';
+          if (sEl) {
+            var robots = [];
+            if (s.videos.transcrites < s.videos.total) robots.push('\ud83c\udfa5');
+            if (s.podcasts.transcrits < s.podcasts.total) robots.push('\ud83c\udfa7');
+            robots.push('\ud83e\udde0');
+            sEl.innerHTML = robots.join(' ') + ' Extraction en cours par ' + robots.length + ' robots IA \u2014 ' + s.global.cerveau_pct + '% du cerveau construit';
+          }
+          if (pcEl) pcEl.textContent = s.podcasts.transcrits + '/' + s.podcasts.total;
+        }).catch(function(e) { console.error('Stats error:', e); });
+      }
       fetchBrainStats();
       setInterval(fetchBrainStats, 60000);
-    }
-    function fetchBrainStats() {
-      fetch(SUPABASE_URL + '/functions/v1/cerveau-stats').then(function(resp) {
-        return resp.json();
-      }).then(function(s) {
-        var vEl = document.getElementById('brainVideos');
-        var wEl = document.getElementById('brainWords');
-        var pEl = document.getElementById('brainProgress');
-        var bEl = document.getElementById('brainBar');
-        var sEl = document.getElementById('brainStatus');
-        var pcEl = document.getElementById('brainPodcasts');
-        if (vEl) vEl.textContent = s.videos.transcrites + '/' + s.videos.total;
-        if (wEl) wEl.textContent = s.global.mots_formates;
-        if (pEl) pEl.textContent = s.global.cerveau_pct + '%';
-        if (bEl) bEl.style.width = s.global.cerveau_pct + '%';
-        if (sEl) {
-          var robots = [];
-          if (s.videos.transcrites < s.videos.total) robots.push('\ud83c\udfa5');
-          if (s.podcasts.transcrits < s.podcasts.total) robots.push('\ud83c\udfa7');
-          robots.push('\ud83e\udde0');
-          sEl.innerHTML = robots.join(' ') + ' Extraction en cours par ' + robots.length + ' robots IA \u2014 ' + s.global.cerveau_pct + '% du cerveau construit';
-        }
-        if (pcEl) pcEl.textContent = s.podcasts.transcrits + '/' + s.podcasts.total;
-      }).catch(function(e) { console.error('Stats error:', e); });
-    }
-
-  fetchBrainStats();
-  // Rafraîchir toutes les 5 minutes
-  setInterval(fetchBrainStats, 300000);
-})();
+    })();
 
 // Stats avec compteur simulé réaliste
 (function() {
