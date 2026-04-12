@@ -1115,12 +1115,13 @@ renderBots();
 
 // === COMPTEUR DU CERVEAU VIRTUEL (temps réel depuis Supabase) ===
 (function loadBrainStats() {
-      var SUPABASE_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co/rest/v1';
+      var SUPABASE_URL = 'https://cbfypewsudbcuslhpkzx.supabase.co';
       function fetchBrainStats() {
         fetch(SUPABASE_URL + '/functions/v1/cerveau-stats').then(function(resp) {
           return resp.json();
         }).then(function(s) {
           var vEl = document.getElementById('brainVideos');
+          if (!s || !s.videos || !s.podcasts || !s.global) return;
           var wEl = document.getElementById('brainWords');
           var pEl = document.getElementById('brainProgress');
           var bEl = document.getElementById('brainBar');
